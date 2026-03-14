@@ -1,200 +1,201 @@
-/* global document, describe, test, expect, beforeEach, afterEach */
+/* global describe, test, expect */
 
 import { processCSSText } from '../src/index.js';
 
-describe('Enhanced CSS cssMixinMacroPolyfill - Shorthand Properties', () => {
-	beforeEach(() => {
-		// Reset CSS.supports mock
-		globalThis.CSS.supports.mockClear();
-
-		// Reset matchMedia mock
-		globalThis.matchMedia.mockClear();
-	});
-
-	afterEach(() => {
-		document.head.innerHTML = '';
-		document.body.innerHTML = '';
-	});
-
-	describe('Shorthand Property Support', () => {
-		test('should handle CSS mixinin border shorthand', () => {
-			const cssText =
-				'.test { border: 2px if(supports(border-style: dashed): dashed; else: solid) red; }';
-
-			globalThis.CSS.supports.mockReturnValue(true);
-
-			const result = processCSSText(cssText);
-			expect(result).toBe('.test { border: 2px dashed red; }');
-		});
-
-		test('should handle CSS mixinin font shorthand', () => {
-			const cssText =
-				'.test { font: if(media(width >= 768px): bold; else: normal) if(media(width >= 768px): 18px; else: 14px)/1.5 Arial, sans-serif; }';
-
-			globalThis.matchMedia.mockReturnValue({ matches: true });
-
-			const result = processCSSText(cssText);
-			expect(result).toBe(
-				'.test { font: bold 18px/1.5 Arial, sans-serif; }'
-			);
-		});
-
-		test('should handle CSS mixinin background shorthand', () => {
-			const cssText =
-				'.test { background: if(media(prefers-color-scheme: dark): #333; else: #fff) if(supports(background-image: linear-gradient(45deg, red, blue)): linear-gradient(45deg, red, blue); else: none) no-repeat center; }';
-
-			globalThis.matchMedia.mockReturnValue({ matches: false });
-			globalThis.CSS.supports.mockReturnValue(true);
-
-			const result = processCSSText(cssText);
-			expect(result).toBe(
-				'.test { background: #fff linear-gradient(45deg, red, blue) no-repeat center; }'
-			);
-		});
-
-		test('should handle CSS mixinin margin shorthand', () => {
-			const cssText =
-				'.test { margin: if(media(width >= 768px): 20px; else: 10px) if(supports(margin-inline: auto): auto; else: 0); }';
-
-			globalThis.matchMedia.mockReturnValue({ matches: true });
-			globalThis.CSS.supports.mockReturnValue(true);
-
-			const result = processCSSText(cssText);
-			expect(result).toBe('.test { margin: 20px auto; }');
-		});
-
-		test('should handle CSS mixinin box-shadow with multiple shadows', () => {
-			const cssText =
-				'.test { box-shadow: if(supports(box-shadow: 0 0 0 rgba(0,0,0,0.1)): 0 2px 4px rgba(0,0,0,0.1); else: none), if(media(width >= 768px): 0 8px 16px rgba(0,0,0,0.1); else: none); }';
-
-			globalThis.CSS.supports.mockReturnValue(true);
-			globalThis.matchMedia.mockReturnValue({ matches: true });
-
-			const result = processCSSText(cssText);
-			expect(result).toBe(
-				'.test { box-shadow: 0 2px 4px rgba(0,0,0,0.1), 0 8px 16px rgba(0,0,0,0.1); }'
-			);
-		});
-	});
-
-	describe('Multiple Conditions in Shorthand', () => {
-		test('should handle multiple conditions within shorthand if()', () => {
-			const cssText =
-				'.test { border: if(media(width >= 1200px): 4px; media(width >= 768px): 2px; else: 1px) solid red; }';
-
-			globalThis.matchMedia.mockImplementation((query) => ({
-				matches: query.includes('768px') && !query.includes('1200px')
-			}));
-
-			const result = processCSSText(cssText);
-			expect(result).toBe('.test { border: 2px solid red; }');
-		});
-
-		test('should handle complex font shorthand with multiple conditions', () => {
-			const cssText =
-				'.test { font: if(media(width >= 1200px): bold; media(width >= 768px): 600; else: normal) if(media(width >= 768px): 18px; else: 14px)/1.5 system-ui, sans-serif; }';
-
-			globalThis.matchMedia.mockImplementation((query) => ({
-				matches: query.includes('768px')
-			}));
-
-			const result = processCSSText(cssText);
-			expect(result).toBe(
-				'.test { font: 600 18px/1.5 system-ui, sans-serif; }'
-			);
-		});
-
-		test('should handle transform with multiple operations', () => {
-			const cssText =
-				'.test { transform: if(supports(transform: scale(1)): scale(1.1); else: none) if(supports(transform: rotate(0deg)): rotate(5deg); else: none); }';
-
-			globalThis.CSS.supports.mockReturnValue(true);
-
-			const result = processCSSText(cssText);
-			expect(result).toBe(
-				'.test { transform: scale(1.1) rotate(5deg); }'
-			);
-		});
-	});
-
-	describe('Complex Parsing Scenarios', () => {
-		test('should handle CSS mixinwith quoted values containing semicolons', () => {
-			const cssText =
-				'.test { content: if(media(width >= 768px): "Hello; World"; else: "Hi"); }';
-
-			globalThis.matchMedia.mockReturnValue({ matches: true });
-
-			const result = processCSSText(cssText);
-			expect(result).toBe('.test { content: "Hello; World"; }');
-		});
-
-		test('should handle CSS mixinwith nested parentheses', () => {
-			const cssText =
-				'.test { background: if(supports(background-image: linear-gradient(45deg, red, blue)): linear-gradient(45deg, rgba(255, 0, 0, 0.5), rgba(0, 0, 255, 0.5)); else: red); }';
-
-			globalThis.CSS.supports.mockReturnValue(true);
-
-			const result = processCSSText(cssText);
-			expect(result).toBe(
-				'.test { background: linear-gradient(45deg, rgba(255, 0, 0, 0.5), rgba(0, 0, 255, 0.5)); }'
-			);
-		});
-
-		test('should handle empty CSS mixinresults in shorthand', () => {
-			const cssText =
-				'.test { margin: if(false: 20px) if(media(width >= 768px): 10px; else: 5px); }';
-
-			globalThis.matchMedia.mockReturnValue({ matches: true });
-
-			const result = processCSSText(cssText);
-			expect(result).toBe('.test { margin:  10px; }');
-		});
-	});
-
-	describe('Error Handling', () => {
-		test('should handle malformed CSS mixinin shorthand gracefully', () => {
-			const cssText =
-				'.test { margin: if(invalid-syntax) if(media(width >= 768px): 10px; else: 5px); }';
-
-			globalThis.matchMedia.mockReturnValue({ matches: true });
-
-			const result = processCSSText(cssText);
-			expect(result).toBe('.test { margin: if(invalid-syntax) 10px; }');
-		});
-
-		test('should handle complex CSS with multiple properties', () => {
+describe('Enhanced CSS Mixin and Macro Polyfill - Advanced Scenarios', () => {
+	describe('Multiple @apply rules in one selector', () => {
+		test('should apply multiple macros in a single rule', () => {
 			const cssText = `
-        .test {
-          margin: if(media(width >= 768px): 20px; else: 10px) auto;
-          border: if(supports(border-style: dashed): 2px; else: 1px) if(supports(border-style: dashed): dashed; else: solid) red;
-          transform: if(supports(transform: scale(1)): scale(1.1); else: none) if(supports(transform: rotate(0deg)): rotate(5deg); else: none);
-        }
-      `;
-
-			globalThis.matchMedia.mockReturnValue({ matches: true });
-			globalThis.CSS.supports.mockReturnValue(true);
-
+@macro --reset-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@macro --center-text {
+  text-align: center;
+}
+.nav {
+  @apply --reset-list;
+  @apply --center-text;
+}`;
 			const result = processCSSText(cssText);
 
-			expect(result).toContain('margin: 20px auto');
-			expect(result).toContain('border: 2px dashed red');
-			expect(result).toContain('transform: scale(1.1) rotate(5deg)');
+			expect(result).toContain('margin: 0');
+			expect(result).toContain('padding: 0');
+			expect(result).toContain('list-style: none');
+			expect(result).toContain('text-align: center');
+			expect(result).not.toContain('@apply');
 		});
 	});
 
-	describe('Public API with Enhanced Features', () => {
-		test('should process shorthand via processCSSText function', () => {
-			const result = processCSSText(
-				'.test { border: if(style(--true): 2px; else: 1px) if(style(--true): solid; else: dashed) red; }'
-			);
-			expect(result).toBe('.test { border: 1px dashed red; }');
+	describe('Mixin parameters with multiple arguments', () => {
+		test('should substitute multiple parameters', () => {
+			const cssText = `
+@mixin --box(--width <length>: 100px, --height <length>: 50px) {
+  @result {
+    width: var(--width);
+    height: var(--height);
+  }
+}
+.box {
+  @apply --box(200px, 100px);
+}`;
+			const result = processCSSText(cssText);
+
+			expect(result).toContain('width: 200px');
+			expect(result).toContain('height: 100px');
 		});
 
-		test('should handle complex shorthand via processCSSText function', () => {
-			const result = processCSSText(
-				'.test { font: if(style(--true): bold; else: normal) if(style(--true): 18px; else: 14px)/1.5 Arial; }'
-			);
-			expect(result).toBe('.test { font: normal 14px/1.5 Arial; }');
+		test('should use defaults for missing arguments', () => {
+			const cssText = `
+@mixin --box(--width <length>: 100px, --height <length>: 50px) {
+  @result {
+    width: var(--width);
+    height: var(--height);
+  }
+}
+.box {
+  @apply --box;
+}`;
+			const result = processCSSText(cssText);
+
+			expect(result).toContain('width: 100px');
+			expect(result).toContain('height: 50px');
+		});
+	});
+
+	describe('Nested @apply within mixin @result', () => {
+		test('should handle nested mixin/macro application', () => {
+			const cssText = `
+@macro --reset {
+  margin: 0;
+  padding: 0;
+}
+@mixin --card() {
+  @result {
+    @apply --reset;
+    border: 1px solid gray;
+  }
+}
+.card {
+  @apply --card;
+}`;
+			const result = processCSSText(cssText);
+
+			expect(result).toContain('margin: 0');
+			expect(result).toContain('padding: 0');
+			expect(result).toContain('border: 1px solid gray');
+			expect(result).not.toContain('@apply');
+		});
+	});
+
+	describe('Later definitions overwrite earlier ones', () => {
+		test('should use the last definition when names conflict', () => {
+			const cssText = `
+@macro --style {
+  color: red;
+}
+@macro --style {
+  color: blue;
+}
+.test {
+  @apply --style;
+}`;
+			const result = processCSSText(cssText);
+
+			expect(result).toContain('color: blue');
+			expect(result).not.toContain('color: red');
+		});
+
+		test('macro and mixin share the same namespace', () => {
+			const cssText = `
+@macro --shared {
+  color: red;
+}
+@mixin --shared() {
+  @result {
+    color: green;
+  }
+}
+.test {
+  @apply --shared;
+}`;
+			const result = processCSSText(cssText);
+
+			expect(result).toContain('color: green');
+		});
+	});
+
+	describe('@contents fallback', () => {
+		test('should use @contents fallback when no contents block is provided', () => {
+			const cssText = `
+@macro --wrapper {
+  @contents { color: red; }
+}
+.test {
+  @apply --wrapper;
+}`;
+			const result = processCSSText(cssText);
+
+			expect(result).toContain('color: red');
+		});
+
+		test('should override fallback with provided contents block', () => {
+			const cssText = `
+@macro --wrapper {
+  @contents { color: red; }
+}
+.test {
+  @apply --wrapper { color: blue; }
+}`;
+			const result = processCSSText(cssText);
+
+			expect(result).toContain('color: blue');
+			expect(result).not.toContain('color: red');
+		});
+
+		test('should substitute nothing for empty contents block', () => {
+			const cssText = `
+@macro --wrapper {
+  @contents { color: red; }
+}
+.test {
+  @apply --wrapper {}
+}`;
+			const result = processCSSText(cssText);
+
+			expect(result).not.toContain('color: red');
+		});
+	});
+
+	describe('Complex CSS with mixed regular and mixin rules', () => {
+		test('should preserve non-mixin rules alongside mixin substitutions', () => {
+			const cssText = `
+@macro --highlight {
+  background: yellow;
+  font-weight: bold;
+}
+.header {
+  font-size: 24px;
+}
+.important {
+  @apply --highlight;
+  font-size: 16px;
+}
+.footer {
+  padding: 20px;
+}`;
+			const result = processCSSText(cssText);
+
+			expect(result).toContain('.header');
+			expect(result).toContain('font-size: 24px');
+			expect(result).toContain('background: yellow');
+			expect(result).toContain('font-weight: bold');
+			expect(result).toContain('font-size: 16px');
+			expect(result).toContain('.footer');
+			expect(result).toContain('padding: 20px');
+			expect(result).not.toContain('@macro');
+			expect(result).not.toContain('@apply');
 		});
 	});
 });
