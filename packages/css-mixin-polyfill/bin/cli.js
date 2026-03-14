@@ -76,6 +76,12 @@ const main = async () => {
 			console.log(
 				'  ✅ All @mixin/@macro rules transformed to native CSS'
 			);
+
+			if (result.hasRuntimeRules) {
+				console.log('  ⚠️  Some mixins require runtime processing');
+			} else {
+				console.log('  ✅ All mixins transformed to native CSS');
+			}
 		}
 
 		const finalCSS = result.nativeCSS;

@@ -1,491 +1,477 @@
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>CSS Mixin/Macro Polyfill - Enhanced Examples</title>
-		<!-- Favicon for older Browsers -->
-		<link rel="icon" type="image/x-icon" href="../favicon.ico" />
-		<!-- SVG-Favicon for modern browsers -->
-		<link rel="icon" type="image/svg+xml" href="../favicon.svg" />
 
-		<!-- PNG-Favicons for High-DPI (Retina) Displays -->
-		<link
-			rel="icon"
-			type="image/png"
-			sizes="32x32"
-			href="../favicon-32x32.png"
-		/>
-		<link
-			rel="icon"
-			type="image/png"
-			sizes="16x16"
-			href="../favicon-16x16.png"
-		/>
-		<style>
-			body {
-				font-family:
-					system-ui,
-					-apple-system,
-					sans-serif;
-				margin: 0;
-				padding: 20px;
-				background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-				min-height: 100vh;
-			}
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>CSS Mixin/Macro Polyfill - Enhanced Examples</title>
+	<!-- Favicon for older Browsers -->
+	<link rel="icon" type="image/x-icon" href="../favicon.ico" />
+	<!-- SVG-Favicon for modern browsers -->
+	<link rel="icon" type="image/svg+xml" href="../favicon.svg" />
 
-			.container {
-				max-width: 1200px;
-				margin: 0 auto;
-				background: rgba(255, 255, 255, 0.95);
-				padding: 40px;
-				border-radius: 20px;
-				box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-			}
+	<!-- PNG-Favicons for High-DPI (Retina) Displays -->
+	<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+	<link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+	<style>
+		body {
+			font-family:
+				system-ui,
+				-apple-system,
+				sans-serif;
+			margin: 0;
+			padding: 20px;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			min-height: 100vh;
+		}
 
-			h1 {
-				text-align: center;
-				color: #333;
-				margin-bottom: 40px;
-				font-size: 2.5em;
-			}
+		.container {
+			max-width: 1200px;
+			margin: 0 auto;
+			background: rgba(255, 255, 255, 0.95);
+			padding: 40px;
+			border-radius: 20px;
+			box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+		}
 
-			.demo-section {
-				margin-bottom: 50px;
-				padding: 30px;
-				background: #f8f9fa;
-				border-radius: 15px;
-				border-left: 5px solid #007acc;
-			}
+		h1 {
+			text-align: center;
+			color: #333;
+			margin-bottom: 40px;
+			font-size: 2.5em;
+		}
 
-			.demo-section h2 {
-				color: #007acc;
-				margin-top: 0;
-			}
+		.demo-section {
+			margin-bottom: 50px;
+			padding: 30px;
+			background: #f8f9fa;
+			border-radius: 15px;
+			border-left: 5px solid #007acc;
+		}
 
-			.code-block {
-				background: #2d3748;
-				color: #e2e8f0;
-				padding: 20px;
-				border-radius: 10px;
-				font-family: "Courier New", monospace;
-				margin: 15px 0;
-				overflow-x: auto;
-				white-space: pre-wrap;
-			}
+		.demo-section h2 {
+			color: #007acc;
+			margin-top: 0;
+		}
 
-			.example-result {
-				padding: 20px;
-				border: 2px solid #007acc;
-				border-radius: 10px;
-				background: white;
-				margin: 15px 0;
-			}
+		.code-block {
+			background: #2d3748;
+			color: #e2e8f0;
+			padding: 20px;
+			border-radius: 10px;
+			font-family: "Courier New", monospace;
+			margin: 15px 0;
+			overflow-x: auto;
+			white-space: pre-wrap;
+		}
 
-			/* =============================================
+		.example-result {
+			padding: 20px;
+			border: 2px solid #007acc;
+			border-radius: 10px;
+			background: white;
+			margin: 15px 0;
+		}
+
+		/* =============================================
 		   Enhanced Mixin and Macro Definitions
 		   ============================================= */
 
-			/* 1. Responsive border mixin */
-			@mixin --responsive-border(
-				--wide-width: 4px,
-				--medium-width: 2px,
-				--narrow-width: 1px,
-				--border-color: #333
-			) {
-				@result {
-					border: var(--narrow-width) solid var(--border-color);
-					padding: 20px;
-					background: #f0f8ff;
-					border-radius: 8px;
+		/* 1. Responsive border mixin */
+		@mixin --responsive-border(--wide-width: 4px,
+			--medium-width: 2px,
+			--narrow-width: 1px,
+			--border-color: #333) {
+			@result {
+				border: var(--narrow-width) solid var(--border-color);
+				padding: 20px;
+				background: #f0f8ff;
+				border-radius: 8px;
 
-					@media (width >=768px) {
-						border-width: var(--medium-width);
-					}
+				@media (width >=768px) {
+					border-width: var(--medium-width);
+				}
 
-					@media (width >=1200px) {
-						border-width: var(--wide-width);
-					}
+				@media (width >=1200px) {
+					border-width: var(--wide-width);
 				}
 			}
+		}
 
-			/* 2. Auto-centering responsive margin mixin */
-			@mixin --responsive-margin(
-				--large: 40px,
-				--medium: 20px,
-				--small: 10px
-			) {
-				@result {
-					margin: var(--small) auto;
-					padding: 25px;
-					background: linear-gradient(45deg, #ff6b6b, #ee5a24);
-					color: white;
-					border-radius: 12px;
-					text-align: center;
-
-					@media (width >=768px) {
-						margin: var(--medium) auto;
-					}
-
-					@media (width >=1024px) {
-						margin: var(--large) auto;
-					}
-				}
-			}
-
-			/* 3. Dynamic font mixin */
-			@mixin --dynamic-font(--large-size: 24px, --small-size: 18px) {
-				@result {
-					font:
-						600 var(--small-size) / 1.4 system-ui,
-						sans-serif;
-					padding: 20px;
-					background: #e3f2fd;
-					border-radius: 8px;
-
-					@media (width >=768px) {
-						font-size: var(--large-size);
-						line-height: 1.6;
-					}
-				}
-			}
-
-			/* 4. Theme-aware background mixin */
-			@mixin --theme-background(--light-bg: #ffffff, --dark-bg: #2d3748) {
-				@result {
-					background: var(--light-bg);
-					color: #2d3748;
-					padding: 30px;
-					border-radius: 12px;
-					min-height: 100px;
-
-					@media (prefers-color-scheme: dark) {
-						background: var(--dark-bg);
-						color: #e2e8f0;
-					}
-				}
-			}
-
-			/* 5. Layered shadow macro */
-			@macro --layered-shadow {
-				box-shadow:
-					0 4px 6px rgba(0, 0, 0, 0.1),
-					0 10px 15px rgba(0, 0, 0, 0.1),
-					inset 0 1px 0 rgba(255, 255, 255, 0.1);
+		/* 2. Auto-centering responsive margin mixin */
+		@mixin --responsive-margin(--large: 40px,
+			--medium: 20px,
+			--small: 10px) {
+			@result {
+				margin: var(--small) auto;
 				padding: 25px;
-				background: white;
-				border-radius: 15px;
-				margin: 20px 0;
-			}
+				background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+				color: white;
+				border-radius: 12px;
+				text-align: center;
 
-			/* 6. Transform hover mixin */
-			@mixin --transform-hover(--scale: 1.05, --rotate: 2deg) {
-				@result {
-					transform: scale(var(--scale)) rotate(var(--rotate));
-					transition: all 0.3s ease;
-					padding: 20px;
-					background: #4caf50;
-					color: white;
-					border-radius: 10px;
-					cursor: pointer;
+				@media (width >=768px) {
+					margin: var(--medium) auto;
+				}
 
-					@media (prefers-reduced-motion: reduce) {
-						transition: none;
-						transform: none;
-					}
+				@media (width >=1024px) {
+					margin: var(--large) auto;
 				}
 			}
+		}
 
-			/* 7. Adaptive grid mixin */
-			@mixin --adaptive-grid(
-				--cols-wide: repeat(4, 1fr),
-				--cols-medium: repeat(2, 1fr),
-				--cols-narrow: 1fr
-			) {
-				@result {
-					display: grid;
-					gap: 20px;
-					grid-template-columns: var(--cols-narrow);
+		/* 3. Dynamic font mixin */
+		@mixin --dynamic-font(--large-size: 24px, --small-size: 18px) {
+			@result {
+				font:
+					600 var(--small-size) / 1.4 system-ui,
+					sans-serif;
+				padding: 20px;
+				background: #e3f2fd;
+				border-radius: 8px;
 
-					@media (width >=768px) {
-						grid-template-columns: var(--cols-medium);
-					}
-
-					@media (width >=1200px) {
-						grid-template-columns: var(--cols-wide);
-					}
+				@media (width >=768px) {
+					font-size: var(--large-size);
+					line-height: 1.6;
 				}
 			}
+		}
 
-			/* 8. Fancy text decoration macro */
-			@macro --fancy-text {
-				text-decoration: underline wavy #007acc;
-				text-decoration-thickness: 2px;
-				padding: 15px;
-				font-size: 18px;
-				font-weight: 600;
+		/* 4. Theme-aware background mixin */
+		@mixin --theme-background(--light-bg: #ffffff, --dark-bg: #2d3748) {
+			@result {
+				background: var(--light-bg);
+				color: #2d3748;
+				padding: 30px;
+				border-radius: 12px;
+				min-height: 100px;
+
+				@media (prefers-color-scheme: dark) {
+					background: var(--dark-bg);
+					color: #e2e8f0;
+				}
 			}
+		}
 
-			/* 9. Focus outline macro */
-			@macro --focus-outline {
-				outline: 2px dashed #1976d2;
-				outline-offset: 4px;
-				padding: 15px;
-				background: #f5f5f5;
-				border: none;
-				border-radius: 6px;
+		/* 5. Layered shadow macro */
+		@macro --layered-shadow {
+			box-shadow:
+				0 4px 6px rgba(0, 0, 0, 0.1),
+				0 10px 15px rgba(0, 0, 0, 0.1),
+				inset 0 1px 0 rgba(255, 255, 255, 0.1);
+			padding: 25px;
+			background: white;
+			border-radius: 15px;
+			margin: 20px 0;
+		}
+
+		/* 6. Transform hover mixin */
+		@mixin --transform-hover(--scale: 1.05, --rotate: 2deg) {
+			@result {
+				transform: scale(var(--scale)) rotate(var(--rotate));
+				transition: all 0.3s ease;
+				padding: 20px;
+				background: #4caf50;
+				color: white;
+				border-radius: 10px;
 				cursor: pointer;
-			}
 
-			/* 10. Animated pulse mixin */
-			@mixin --animated-pulse(--duration: 2s) {
-				@result {
-					animation: pulse var(--duration)
-						cubic-bezier(0.4, 0, 0.2, 1) infinite;
-					padding: 20px;
-					background: #ff9800;
-					color: white;
-					border-radius: 10px;
-					text-align: center;
-
-					@media (prefers-reduced-motion: reduce) {
-						animation: none;
-					}
+				@media (prefers-reduced-motion: reduce) {
+					transition: none;
+					transform: none;
 				}
 			}
+		}
 
-			@keyframes pulse {
-				0%,
-				100% {
-					opacity: 1;
+		/* 7. Adaptive grid mixin */
+		@mixin --adaptive-grid(--cols-wide: repeat(4, 1fr),
+			--cols-medium: repeat(2, 1fr),
+			--cols-narrow: 1fr) {
+			@result {
+				display: grid;
+				gap: 20px;
+				grid-template-columns: var(--cols-narrow);
+
+				@media (width >=768px) {
+					grid-template-columns: var(--cols-medium);
 				}
 
-				50% {
-					opacity: 0.7;
+				@media (width >=1200px) {
+					grid-template-columns: var(--cols-wide);
 				}
 			}
+		}
 
-			/* =============================================
+		/* 8. Fancy text decoration macro */
+		@macro --fancy-text {
+			text-decoration: underline wavy #007acc;
+			text-decoration-thickness: 2px;
+			padding: 15px;
+			font-size: 18px;
+			font-weight: 600;
+		}
+
+		/* 9. Focus outline macro */
+		@macro --focus-outline {
+			outline: 2px dashed #1976d2;
+			outline-offset: 4px;
+			padding: 15px;
+			background: #f5f5f5;
+			border: none;
+			border-radius: 6px;
+			cursor: pointer;
+		}
+
+		/* 10. Animated pulse mixin */
+		@mixin --animated-pulse(--duration: 2s) {
+			@result {
+				animation: pulse var(--duration) cubic-bezier(0.4, 0, 0.2, 1) infinite;
+				padding: 20px;
+				background: #ff9800;
+				color: white;
+				border-radius: 10px;
+				text-align: center;
+
+				@media (prefers-reduced-motion: reduce) {
+					animation: none;
+				}
+			}
+		}
+
+		@keyframes pulse {
+
+			0%,
+			100% {
+				opacity: 1;
+			}
+
+			50% {
+				opacity: 0.7;
+			}
+		}
+
+		/* =============================================
 		   Applying Mixins and Macros
 		   ============================================= */
 
-			.multi-border {
-				@apply --responsive-border;
-			}
+		.multi-border {
+			@apply --responsive-border;
+		}
 
-			.responsive-margin {
-				@apply --responsive-margin;
-			}
+		.responsive-margin {
+			@apply --responsive-margin;
+		}
 
-			.dynamic-font {
-				@apply --dynamic-font;
-			}
+		.dynamic-font {
+			@apply --dynamic-font;
+		}
 
-			.conditional-background {
-				@apply --theme-background;
-			}
+		.conditional-background {
+			@apply --theme-background;
+		}
 
-			.layered-shadow {
-				@apply --layered-shadow;
-			}
+		.layered-shadow {
+			@apply --layered-shadow;
+		}
 
-			.multi-transform {
-				@apply --transform-hover;
-			}
+		.multi-transform {
+			@apply --transform-hover;
+		}
 
-			.multi-transform:hover {
-				transform: scale(1.1) rotate(-2deg) translateY(-10px);
-			}
+		.multi-transform:hover {
+			transform: scale(1.1) rotate(-2deg) translateY(-10px);
+		}
 
-			.adaptive-grid {
-				@apply --adaptive-grid;
-			}
+		.adaptive-grid {
+			@apply --adaptive-grid;
+		}
 
-			.grid-item {
-				padding: 20px;
-				background: #e1f5fe;
-				border-radius: 8px;
-				text-align: center;
-			}
+		.grid-item {
+			padding: 20px;
+			background: #e1f5fe;
+			border-radius: 8px;
+			text-align: center;
+		}
 
-			.fancy-text {
-				@apply --fancy-text;
-			}
+		.fancy-text {
+			@apply --fancy-text;
+		}
 
-			.focus-element {
-				@apply --focus-outline;
-			}
+		.focus-element {
+			@apply --focus-outline;
+		}
 
-			.animated-element {
-				@apply --animated-pulse;
-			}
-		</style>
-	</head>
+		.animated-element {
+			@apply --animated-pulse;
+		}
+	</style>
+</head>
 
-	<body>
-		<div class="container">
-			<h1>CSS Mixin/Macro Polyfill - Enhanced Examples</h1>
-			<p style="text-align: center; font-size: 18px; color: #666">
-				Demonstrating @mixin and @macro for complex, reusable style
-				patterns
-			</p>
+<body>
+	<div class="container">
+		<h1>CSS Mixin/Macro Polyfill - Enhanced Examples</h1>
+		<p style="text-align: center; font-size: 18px; color: #666">
+			Demonstrating @mixin and @macro for complex, reusable style
+			patterns
+		</p>
 
-			<div class="demo-section">
-				<h2>1. Responsive Border (@mixin with breakpoints)</h2>
-				<div class="code-block">
-					@mixin --responsive-border(--wide-width: 4px,
-					--narrow-width: 1px, --border-color: #333) { @result {
-					border: var(--narrow-width) solid var(--border-color);
-					@media (width >= 1200px) { border-width: var(--wide-width);
-					} } } .multi-border { @apply --responsive-border; }
-				</div>
-				<div class="example-result multi-border">
-					This element has a responsive border that adapts to viewport
-					width!
-				</div>
+		<div class="demo-section">
+			<h2>1. Responsive Border (@mixin with breakpoints)</h2>
+			<div class="code-block">
+				@mixin --responsive-border(--wide-width: 4px,
+				--narrow-width: 1px, --border-color: #333) { @result {
+				border: var(--narrow-width) solid var(--border-color);
+				@media (width >= 1200px) { border-width: var(--wide-width);
+				} } } .multi-border { @apply --responsive-border; }
 			</div>
-
-			<div class="demo-section">
-				<h2>2. Responsive Margin with Auto Centering</h2>
-				<div class="code-block">
-					@mixin --responsive-margin(--large: 40px, --medium: 20px,
-					--small: 10px) { @result { margin: var(--small) auto; @media
-					(width >= 1024px) { margin: var(--large) auto; } } }
-					.responsive-margin { @apply --responsive-margin; }
-				</div>
-				<div class="example-result responsive-margin">
-					Responsive margins with conditional auto-centering
-				</div>
+			<div class="example-result multi-border">
+				This element has a responsive border that adapts to viewport
+				width!
 			</div>
+		</div>
 
-			<div class="demo-section">
-				<h2>3. Dynamic Font (@mixin with font parameters)</h2>
-				<div class="code-block">
-					@mixin --dynamic-font(--large-size: 24px, --small-size:
-					18px) { @result { font: 600 var(--small-size) / 1.4
-					system-ui, sans-serif; @media (width >= 768px) { font-size:
-					var(--large-size); } } } .dynamic-font { @apply
-					--dynamic-font; }
-				</div>
-				<div class="example-result dynamic-font">
-					This text uses a @mixin with responsive font size and
-					line-height!
-				</div>
+		<div class="demo-section">
+			<h2>2. Responsive Margin with Auto Centering</h2>
+			<div class="code-block">
+				@mixin --responsive-margin(--large: 40px, --medium: 20px,
+				--small: 10px) { @result { margin: var(--small) auto; @media
+				(width >= 1024px) { margin: var(--large) auto; } } }
+				.responsive-margin { @apply --responsive-margin; }
 			</div>
-
-			<div class="demo-section">
-				<h2>4. Theme-Aware Background (@mixin with dark mode)</h2>
-				<div class="code-block">
-					@mixin --theme-background(--light-bg: #ffffff, --dark-bg:
-					#2d3748) { @result { background: var(--light-bg); @media
-					(prefers-color-scheme: dark) { background: var(--dark-bg); }
-					} } .conditional-background { @apply --theme-background; }
-				</div>
-				<div class="example-result conditional-background">
-					Background adapts to your system's color scheme preference
-				</div>
+			<div class="example-result responsive-margin">
+				Responsive margins with conditional auto-centering
 			</div>
+		</div>
 
-			<div class="demo-section">
-				<h2>5. Layered Box Shadow (@macro)</h2>
-				<div class="code-block">
-					@macro --layered-shadow { box-shadow: 0 4px 6px rgba(0, 0,
-					0, 0.1), 0 10px 15px rgba(0, 0, 0, 0.1), inset 0 1px 0
-					rgba(255, 255, 255, 0.1); border-radius: 15px; }
-					.layered-shadow { @apply --layered-shadow; }
-				</div>
-				<div class="example-result layered-shadow">
-					Multiple shadow layers for enhanced depth, applied via
-					@macro
-				</div>
+		<div class="demo-section">
+			<h2>3. Dynamic Font (@mixin with font parameters)</h2>
+			<div class="code-block">
+				@mixin --dynamic-font(--large-size: 24px, --small-size:
+				18px) { @result { font: 600 var(--small-size) / 1.4
+				system-ui, sans-serif; @media (width >= 768px) { font-size:
+				var(--large-size); } } } .dynamic-font { @apply
+				--dynamic-font; }
 			</div>
-
-			<div class="demo-section">
-				<h2>6. Transform Hover (@mixin with reduced motion)</h2>
-				<div class="code-block">
-					@mixin --transform-hover(--scale: 1.05, --rotate: 2deg) {
-					@result { transform: scale(var(--scale))
-					rotate(var(--rotate)); @media (prefers-reduced-motion:
-					reduce) { transition: none; transform: none; } } }
-					.multi-transform { @apply --transform-hover; }
-				</div>
-				<div class="example-result multi-transform">
-					Hover me! Transform with accessibility-aware reduced motion
-				</div>
+			<div class="example-result dynamic-font">
+				This text uses a @mixin with responsive font size and
+				line-height!
 			</div>
+		</div>
 
-			<div class="demo-section">
-				<h2>7. Adaptive Grid Layout (@mixin with column templates)</h2>
-				<div class="code-block">
-					@mixin --adaptive-grid( --cols-wide: repeat(4, 1fr),
-					--cols-medium: repeat(2, 1fr), --cols-narrow: 1fr ) {
-					@result { display: grid; grid-template-columns:
-					var(--cols-narrow); @media (width >= 768px) {
-					grid-template-columns: var(--cols-medium); } @media (width
-					>= 1200px) { grid-template-columns: var(--cols-wide); } } }
-				</div>
-				<div class="example-result">
-					<div class="adaptive-grid">
-						<div class="grid-item">Item 1</div>
-						<div class="grid-item">Item 2</div>
-						<div class="grid-item">Item 3</div>
-						<div class="grid-item">Item 4</div>
-						<div class="grid-item">Item 5</div>
-						<div class="grid-item">Item 6</div>
-					</div>
-				</div>
+		<div class="demo-section">
+			<h2>4. Theme-Aware Background (@mixin with dark mode)</h2>
+			<div class="code-block">
+				@mixin --theme-background(--light-bg: #ffffff, --dark-bg:
+				#2d3748) { @result { background: var(--light-bg); @media
+				(prefers-color-scheme: dark) { background: var(--dark-bg); }
+				} } .conditional-background { @apply --theme-background; }
 			</div>
-
-			<div class="demo-section">
-				<h2>8. Fancy Text Decoration (@macro)</h2>
-				<div class="code-block">
-					@macro --fancy-text { text-decoration: underline wavy
-					#007acc; text-decoration-thickness: 2px; font-size: 18px;
-					font-weight: 600; } .fancy-text { @apply --fancy-text; }
-				</div>
-				<div class="example-result fancy-text">
-					This text has decorative styling applied via @macro
-				</div>
+			<div class="example-result conditional-background">
+				Background adapts to your system's color scheme preference
 			</div>
+		</div>
 
-			<div class="demo-section">
-				<h2>9. Focus Outline (@macro)</h2>
-				<div class="code-block">
-					@macro --focus-outline { outline: 2px dashed #1976d2;
-					outline-offset: 4px; } .focus-element { @apply
-					--focus-outline; }
-				</div>
-				<div class="example-result">
-					<button class="focus-element">
-						Click me to see the @macro-applied outline!
-					</button>
-				</div>
+		<div class="demo-section">
+			<h2>5. Layered Box Shadow (@macro)</h2>
+			<div class="code-block">
+				@macro --layered-shadow { box-shadow: 0 4px 6px rgba(0, 0,
+				0, 0.1), 0 10px 15px rgba(0, 0, 0, 0.1), inset 0 1px 0
+				rgba(255, 255, 255, 0.1); border-radius: 15px; }
+				.layered-shadow { @apply --layered-shadow; }
 			</div>
+			<div class="example-result layered-shadow">
+				Multiple shadow layers for enhanced depth, applied via
+				@macro
+			</div>
+		</div>
 
-			<div class="demo-section">
-				<h2>10. Animated Pulse (@mixin with reduced motion)</h2>
-				<div class="code-block">
-					@mixin --animated-pulse(--duration: 2s) { @result {
-					animation: pulse var(--duration) cubic-bezier(0.4, 0, 0.2,
-					1) infinite; @media (prefers-reduced-motion: reduce) {
-					animation: none; } } } .animated-element { @apply
-					--animated-pulse; }
-				</div>
-				<div class="example-result animated-element">
-					Animated element with configurable timing that respects
-					motion preferences
+		<div class="demo-section">
+			<h2>6. Transform Hover (@mixin with reduced motion)</h2>
+			<div class="code-block">
+				@mixin --transform-hover(--scale: 1.05, --rotate: 2deg) {
+				@result { transform: scale(var(--scale))
+				rotate(var(--rotate)); @media (prefers-reduced-motion:
+				reduce) { transition: none; transform: none; } } }
+				.multi-transform { @apply --transform-hover; }
+			</div>
+			<div class="example-result multi-transform">
+				Hover me! Transform with accessibility-aware reduced motion
+			</div>
+		</div>
+
+		<div class="demo-section">
+			<h2>7. Adaptive Grid Layout (@mixin with column templates)</h2>
+			<div class="code-block">
+				@mixin --adaptive-grid( --cols-wide: repeat(4, 1fr),
+				--cols-medium: repeat(2, 1fr), --cols-narrow: 1fr ) {
+				@result { display: grid; grid-template-columns:
+				var(--cols-narrow); @media (width >= 768px) {
+				grid-template-columns: var(--cols-medium); } @media (width
+				>= 1200px) { grid-template-columns: var(--cols-wide); } } }
+			</div>
+			<div class="example-result">
+				<div class="adaptive-grid">
+					<div class="grid-item">Item 1</div>
+					<div class="grid-item">Item 2</div>
+					<div class="grid-item">Item 3</div>
+					<div class="grid-item">Item 4</div>
+					<div class="grid-item">Item 5</div>
+					<div class="grid-item">Item 6</div>
 				</div>
 			</div>
 		</div>
 
-		<script type="module">
-			import { init } from "../packages/css-mixin-polyfill/dist/index.umd.js";
+		<div class="demo-section">
+			<h2>8. Fancy Text Decoration (@macro)</h2>
+			<div class="code-block">
+				@macro --fancy-text { text-decoration: underline wavy
+				#007acc; text-decoration-thickness: 2px; font-size: 18px;
+				font-weight: 600; } .fancy-text { @apply --fancy-text; }
+			</div>
+			<div class="example-result fancy-text">
+				This text has decorative styling applied via @macro
+			</div>
+		</div>
 
-			// Initialize polyfill with debug enabled
-			const polyfill = init({ debug: true });
+		<div class="demo-section">
+			<h2>9. Focus Outline (@macro)</h2>
+			<div class="code-block">
+				@macro --focus-outline { outline: 2px dashed #1976d2;
+				outline-offset: 4px; } .focus-element { @apply
+				--focus-outline; }
+			</div>
+			<div class="example-result">
+				<button class="focus-element">
+					Click me to see the @macro-applied outline!
+				</button>
+			</div>
+		</div>
 
-			console.log("Enhanced CSS Mixin/Macro Polyfill loaded!");
-			console.log("@mixin and @macro patterns demonstrated");
-		</script>
-	</body>
+		<div class="demo-section">
+			<h2>10. Animated Pulse (@mixin with reduced motion)</h2>
+			<div class="code-block">
+				@mixin --animated-pulse(--duration: 2s) { @result {
+				animation: pulse var(--duration) cubic-bezier(0.4, 0, 0.2,
+				1) infinite; @media (prefers-reduced-motion: reduce) {
+				animation: none; } } } .animated-element { @apply
+				--animated-pulse; }
+			</div>
+			<div class="example-result animated-element">
+				Animated element with configurable timing that respects
+				motion preferences
+			</div>
+		</div>
+	</div>
+
+	<script type="module">
+		import { init } from "../packages/css-mixin-polyfill/dist/index.umd.js";
+
+		// Initialize polyfill with debug enabled
+		const polyfill = init({ debug: true });
+
+		console.log("Enhanced CSS Mixin/Macro Polyfill loaded!");
+		console.log("@mixin and @macro patterns demonstrated");
+	</script>
+</body>
+
 </html>
