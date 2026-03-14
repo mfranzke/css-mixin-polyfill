@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This is a JavaScript polyfill and PostCSS plugin for [CSS mixinality](https://developer.mozilla.org/en-US/docs/Web/CSS/if). The polyfill provides browser support for the CSS mixin with style(), media(), and supports() conditions as specified in the WCAG (Web Content Accessibility Guidelines).
+This is a JavaScript polyfill and PostCSS plugin for [CSS @mixin, @macro, and @apply rules](https://drafts.csswg.org/css-mixins/). The polyfill provides browser support for CSS mixins and macros as specified in the W3C CSS Mixins specification.
 
 <!-- TODO: Update this section if the official specification changes.
 https://drafts.csswg.org/css-mixins/ -->
