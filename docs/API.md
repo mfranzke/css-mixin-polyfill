@@ -22,6 +22,7 @@ npm install css-mixin-polyfill
 ```javascript
 import { init } from "css-mixin-polyfill";
 
+// Initialize the polyfill
 init();
 ```
 
