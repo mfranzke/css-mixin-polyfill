@@ -1,6 +1,7 @@
 /**
- * CSS mixinTransformation Engine
- * Integrated solution combining runtime polyfill with build-time transformation
+ * CSS Mixin/Macro Transformation Engine
+ * Transforms @mixin/@macro definitions and @apply rules into native CSS
+ * Based on the CSS Mixins specification: https://drafts.csswg.org/css-mixins/
  */
 
 /* global document */
@@ -49,7 +50,7 @@ const parseCSSRules = (cssText) => {
 			char === '/' &&
 			nextChar === '*'
 		) {
-			// If we have accumulated content before the comment, save it
+			// If we have accumulated content before the comment and we're not inside a rule, save it
 			if (currentRule.trim() && !inRule) {
 				rules.push(currentRule.trim());
 				currentRule = '';
@@ -65,9 +66,12 @@ const parseCSSRules = (cssText) => {
 			currentRule += char + nextChar;
 			parseState.inComment = false;
 
-			// Save the complete comment as a rule
-			rules.push(currentRule.trim());
-			currentRule = '';
+			// Only save comment as a standalone rule if not inside a rule block
+			if (!inRule) {
+				rules.push(currentRule.trim());
+				currentRule = '';
+			}
+
 			i++; // Skip the next character
 			continue;
 		}
@@ -109,504 +113,638 @@ const parseCSSRules = (cssText) => {
 };
 
 /**
- * Extract mixins from CSS text
+ * Extract content between the outermost braces of a text
  */
-const extractIfFunctions = (cssText) => {
-	const functions = [];
+const extractBraceContent = (text) => {
+	const firstBrace = text.indexOf('{');
+	if (firstBrace === -1) {
+		return '';
+	}
+
+	let depth = 0;
+	for (let i = firstBrace; i < text.length; i++) {
+		if (text[i] === '{') {
+			depth++;
+		} else if (text[i] === '}') {
+			depth--;
+			if (depth === 0) {
+				return text.slice(firstBrace + 1, i);
+			}
+		}
+	}
+
+	return '';
+};
+
+/**
+ * Parse a single @mixin parameter string
+ * Pattern: --name [<type>] [: default]
+ */
+const parseSingleParam = (paramString) => {
+	const trimmed = paramString.trim();
+	if (!trimmed) {
+		return null;
+	}
+
+	// Match: --name, optionally followed by <type>, optionally followed by : default
+	const match = trimmed.match(/^(--[\w-]+)\s*(?:<[^>]+>)?\s*(?::\s*(.+))?$/);
+	if (!match) {
+		return { name: trimmed, defaultValue: null };
+	}
+
+	return {
+		name: match[1],
+		defaultValue: match[2] ? match[2].trim() : null
+	};
+};
+
+/**
+ * Parse @mixin parameter list string into an array of parameter objects
+ */
+const parseMixinParams = (paramsString) => {
+	const trimmed = paramsString.trim();
+	if (!trimmed) {
+		return [];
+	}
+
+	const params = [];
+	let current = '';
+	let depth = 0;
+
+	for (const char of trimmed) {
+		if (char === '(' || char === '<') {
+			depth++;
+		} else if (char === ')' || char === '>') {
+			depth--;
+		}
+
+		if (char === ',' && depth === 0) {
+			const param = parseSingleParam(current);
+			if (param) {
+				params.push(param);
+			}
+
+			current = '';
+		} else {
+			current += char;
+		}
+	}
+
+	const lastParam = parseSingleParam(current);
+	if (lastParam) {
+		params.push(lastParam);
+	}
+
+	return params;
+};
+
+/**
+ * Extract @result blocks from a mixin body
+ */
+const extractResultBlocks = (body) => {
+	const blocks = [];
 	let index = 0;
 
-	while (index < cssText.length) {
-		const ifMatch = cssText.indexOf('if(', index);
-		if (ifMatch === -1) {
+	while (index < body.length) {
+		const resultPos = body.indexOf('@result', index);
+		if (resultPos === -1) {
 			break;
 		}
 
-		// Ensure it's actually an mixin
-		if (ifMatch > 0 && /[\w-]/.test(cssText[ifMatch - 1])) {
-			index = ifMatch + 1;
+		// Make sure it's not part of another word
+		if (resultPos > 0 && /[\w-]/.test(body[resultPos - 1])) {
+			index = resultPos + 7;
 			continue;
 		}
 
-		// Find matching closing parenthesis
-		let depth = 0;
-		let inQuotes = false;
-		let quoteChar = '';
-		const start = ifMatch + 3;
-		let end = -1;
-
-		for (let i = start; i < cssText.length; i++) {
-			const char = cssText[i];
-			const previousChar = i > 0 ? cssText[i - 1] : '';
-
-			// Handle quotes
-			if ((char === '"' || char === "'") && previousChar !== '\\') {
-				if (!inQuotes) {
-					inQuotes = true;
-					quoteChar = char;
-				} else if (char === quoteChar) {
-					inQuotes = false;
-					quoteChar = '';
-				}
+		// Find the opening brace after @result
+		let braceStart = -1;
+		for (let i = resultPos + 7; i < body.length; i++) {
+			if (body[i] === '{') {
+				braceStart = i;
+				break;
 			}
 
-			if (!inQuotes) {
-				if (char === '(') {
+			if (!/\s/.test(body[i])) {
+				break; // Non-whitespace before brace means invalid @result
+			}
+		}
+
+		if (braceStart === -1) {
+			index = resultPos + 7;
+			continue;
+		}
+
+		// Find matching closing brace
+		let depth = 0;
+		let braceEnd = -1;
+		for (let i = braceStart; i < body.length; i++) {
+			if (body[i] === '{') {
+				depth++;
+			} else if (body[i] === '}') {
+				depth--;
+				if (depth === 0) {
+					braceEnd = i;
+					break;
+				}
+			}
+		}
+
+		if (braceEnd === -1) {
+			index = resultPos + 7;
+			continue;
+		}
+
+		blocks.push(body.slice(braceStart + 1, braceEnd).trim());
+		index = braceEnd + 1;
+	}
+
+	return blocks;
+};
+
+/**
+ * Parse a @mixin definition from its rule text
+ * Returns { type, name, params, body, resultBlocks } or null if invalid
+ */
+const parseMixinDefinition = (ruleText) => {
+	const trimmed = ruleText.trim();
+
+	// Must match: @mixin --dashed-name(
+	const nameMatch = trimmed.match(/^@mixin\s+(--[\w-]+)\s*\(/);
+	if (!nameMatch) {
+		return null;
+	}
+
+	const name = nameMatch[1];
+
+	// Find closing paren of parameter list
+	let parenDepth = 0;
+	const paramStart = trimmed.indexOf('(') + 1;
+	let paramEnd = -1;
+
+	for (let i = paramStart; i < trimmed.length; i++) {
+		if (trimmed[i] === '(') {
+			parenDepth++;
+		} else if (trimmed[i] === ')') {
+			if (parenDepth === 0) {
+				paramEnd = i;
+				break;
+			}
+
+			parenDepth--;
+		}
+	}
+
+	if (paramEnd === -1) {
+		return null;
+	}
+
+	const paramsString = trimmed.slice(paramStart, paramEnd);
+	const params = parseMixinParams(paramsString);
+	const body = extractBraceContent(trimmed);
+	const resultBlocks = extractResultBlocks(body);
+
+	return { type: 'mixin', name, params, body, resultBlocks };
+};
+
+/**
+ * Parse a @macro definition from its rule text
+ * Returns { type, name, params, body } or null if invalid
+ */
+const parseMacroDefinition = (ruleText) => {
+	const trimmed = ruleText.trim();
+
+	// Must match: @macro --dashed-name {
+	const nameMatch = trimmed.match(/^@macro\s+(--[\w-]+)\s*\{/);
+	if (!nameMatch) {
+		return null;
+	}
+
+	const name = nameMatch[1];
+	const body = extractBraceContent(trimmed);
+
+	return { type: 'macro', name, params: [], body };
+};
+
+/**
+ * Split function arguments by commas, respecting nesting
+ */
+const splitArguments = (argumentsString) => {
+	const args = [];
+	let current = '';
+	let depth = 0;
+
+	for (const char of argumentsString) {
+		if (char === '(' || char === '[') {
+			depth++;
+		} else if (char === ')' || char === ']') {
+			depth--;
+		}
+
+		if (char === ',' && depth === 0) {
+			args.push(current.trim());
+			current = '';
+		} else {
+			current += char;
+		}
+	}
+
+	if (current.trim()) {
+		args.push(current.trim());
+	}
+
+	return args;
+};
+
+/**
+ * Substitute @contents rules in body text with the provided contents block
+ */
+const substituteContents = (body, contentsBlock) => {
+	let result = body;
+	let index = 0;
+
+	while (index < result.length) {
+		const contentsPos = result.indexOf('@contents', index);
+		if (contentsPos === -1) {
+			break;
+		}
+
+		// Check it's not part of another word
+		if (contentsPos > 0 && /[\w-]/.test(result[contentsPos - 1])) {
+			index = contentsPos + 9;
+			continue;
+		}
+
+		let pos = contentsPos + 9;
+
+		// Skip whitespace
+		while (pos < result.length && /\s/.test(result[pos])) {
+			pos++;
+		}
+
+		let replacement;
+		let endPos;
+
+		if (pos < result.length && result[pos] === '{') {
+			// @contents { fallback } form
+			let depth = 0;
+			let blockEnd = -1;
+			for (let i = pos; i < result.length; i++) {
+				if (result[i] === '{') {
 					depth++;
-				} else if (char === ')') {
+				} else if (result[i] === '}') {
+					depth--;
 					if (depth === 0) {
-						end = i;
+						blockEnd = i;
 						break;
 					}
-
-					depth--;
 				}
 			}
-		}
 
-		if (end === -1) {
-			index = ifMatch + 1;
+			if (blockEnd !== -1) {
+				const fallbackContent = result.slice(pos + 1, blockEnd).trim();
+				replacement =
+					contentsBlock !== null ? contentsBlock : fallbackContent;
+				endPos = blockEnd + 1;
+			} else {
+				replacement = contentsBlock || '';
+				endPos = pos;
+			}
+		} else if (pos < result.length && result[pos] === ';') {
+			// @contents; form (no fallback)
+			replacement = contentsBlock || '';
+			endPos = pos + 1;
 		} else {
-			const fullFunction = cssText.slice(ifMatch, end + 1);
-			const content = cssText.slice(start, end);
-
-			functions.push({
-				fullFunction,
-				content,
-				start: ifMatch,
-				end: end + 1
-			});
-
-			index = end + 1;
+			replacement = contentsBlock || '';
+			endPos = pos;
 		}
+
+		result =
+			result.slice(0, contentsPos) + replacement + result.slice(endPos);
+		index = contentsPos + replacement.length;
 	}
 
-	return functions;
+	return result;
 };
 
 /**
- * Parse mixin content - supports both single conditions and multiple chained conditions
+ * Find @apply rules within a rule body text.
+ * Returns an array of { start, end, name, args, contentsBlock }
  */
-/**
- * Split content by semicolons, respecting parentheses and quotes
- */
-const splitIfConditionSegments = (content) => {
-	const segments = [];
-	let currentSegment = '';
-	let parenDepth = 0;
-	let inQuotes = false;
-	let quoteChar = '';
+const findApplyRules = (bodyText) => {
+	const applies = [];
+	let index = 0;
 
-	for (let i = 0; i < content.length; i++) {
-		const char = content[i];
-		const previousChar = i > 0 ? content[i - 1] : '';
-
-		// Handle quotes
-		if ((char === '"' || char === "'") && previousChar !== '\\') {
-			if (!inQuotes) {
-				inQuotes = true;
-				quoteChar = char;
-			} else if (char === quoteChar) {
-				inQuotes = false;
-				quoteChar = '';
-			}
+	while (index < bodyText.length) {
+		const applyPos = bodyText.indexOf('@apply', index);
+		if (applyPos === -1) {
+			break;
 		}
 
-		if (!inQuotes) {
-			if (char === '(') {
-				parenDepth++;
-			} else if (char === ')') {
-				parenDepth--;
-			} else if (char === ';' && parenDepth === 0) {
-				// End of segment
-				segments.push(currentSegment.trim());
-				currentSegment = '';
-				continue;
-			}
-		}
-
-		currentSegment += char;
-	}
-
-	// Add the last segment
-	if (currentSegment.trim()) {
-		segments.push(currentSegment.trim());
-	}
-
-	return segments;
-};
-
-/**
- * Find colon outside of parentheses and quotes
- */
-const findConditionValueSeparator = (segment) => {
-	let parenDepth = 0;
-	let inQuotes = false;
-	let quoteChar = '';
-
-	for (let i = 0; i < segment.length; i++) {
-		const char = segment[i];
-		const previousChar = i > 0 ? segment[i - 1] : '';
-
-		// Handle quotes
-		if ((char === '"' || char === "'") && previousChar !== '\\') {
-			if (!inQuotes) {
-				inQuotes = true;
-				quoteChar = char;
-			} else if (char === quoteChar) {
-				inQuotes = false;
-				quoteChar = '';
-			}
-		}
-
-		if (!inQuotes) {
-			if (char === '(') {
-				parenDepth++;
-			} else if (char === ')') {
-				parenDepth--;
-			} else if (char === ':' && parenDepth === 0) {
-				return i;
-			}
-		}
-	}
-
-	return -1;
-};
-
-/**
- * Parse mixin content - supports both single conditions and multiple chained conditions
- */
-const parseIfFunction = (content) => {
-	const segments = splitIfConditionSegments(content);
-	const conditions = [];
-	let elseValue = null;
-
-	for (const segment of segments) {
-		// Check if this is an else clause
-		const elseMatch = segment.match(/^else:\s*(.*)$/);
-		if (elseMatch) {
-			elseValue = elseMatch[1].trim();
+		// Make sure it's not part of another word
+		if (applyPos > 0 && /[\w-]/.test(bodyText[applyPos - 1])) {
+			index = applyPos + 6;
 			continue;
 		}
 
-		// Parse condition: value format
-		const colonIndex = findConditionValueSeparator(segment);
-		if (colonIndex === -1) {
-			throw new Error('Invalid mixin: missing colon in segment');
+		let pos = applyPos + 6; // After "@apply"
+
+		// Skip whitespace
+		while (pos < bodyText.length && /\s/.test(bodyText[pos])) {
+			pos++;
 		}
 
-		const conditionPart = segment.slice(0, colonIndex).trim();
-		const valuePart = segment.slice(colonIndex + 1).trim();
-
-		// Parse the condition type and expression
-		const conditionMatch = conditionPart.match(
-			/^(style|media|supports)\((.*)\)$/
-		);
-		if (!conditionMatch) {
-			throw new Error(
-				`Invalid mixin: unknown condition type in "${conditionPart}"`
-			);
+		// Read the name (dashed-ident)
+		let name = '';
+		while (pos < bodyText.length && /[\w-]/.test(bodyText[pos])) {
+			name += bodyText[pos];
+			pos++;
 		}
 
-		conditions.push({
-			conditionType: conditionMatch[1],
-			conditionExpression: conditionMatch[2].trim(),
-			value: valuePart
-		});
-	}
-
-	if (!elseValue) {
-		throw new Error('Invalid mixin: missing else clause');
-	}
-
-	return {
-		conditions,
-		elseValue,
-		isMultipleConditions: conditions.length > 1
-	};
-};
-
-/**
- * Transform property with CSS mixinto native CSS
- */
-const transformPropertyToNative = (selector, property, value) => {
-	const ifFunctions = extractIfFunctions(value);
-
-	if (ifFunctions.length === 0) {
-		return {
-			nativeCSS: `${selector} { ${property}: ${value}; }`,
-			runtimeCSS: '',
-			hasRuntimeRules: false
-		};
-	}
-
-	const nativeRules = [];
-	const runtimeRules = [];
-
-	// Process each mixin
-	for (const ifFunc of ifFunctions) {
-		try {
-			const parsed = parseIfFunction(ifFunc.content);
-
-			// Check if any condition uses style() - if so, needs runtime processing
-			const hasStyleCondition = parsed.conditions.some(
-				(condition) => condition.conditionType === 'style'
-			);
-
-			if (hasStyleCondition) {
-				// If any condition uses style(), fall back to runtime processing
-				runtimeRules.push({
-					selector,
-					property,
-					value,
-					condition: parsed
-				});
-				continue;
-			}
-
-			// All conditions are media() or supports() - can transform to native CSS
-			// Create fallback rule first
-			const fallbackValue = value.replace(
-				ifFunc.fullFunction,
-				parsed.elseValue
-			);
-			nativeRules.push({
-				condition: null, // No condition = fallback
-				rule: `${selector} { ${property}: ${fallbackValue}; }`
-			});
-
-			// Create conditional rules for each condition (in reverse order for CSS cascade)
-			const { conditions } = parsed;
-			for (let i = conditions.length - 1; i >= 0; i--) {
-				const condition = conditions[i];
-
-				// Smart parentheses handling: don't add parentheses if:
-				// 1. The expression already starts with '(' and ends with ')'
-				// 2. The expression already contains properly parenthesized conditions (like media queries)
-				const trimmed = condition.conditionExpression.trim();
-				const needsParentheses = !(
-					(trimmed.startsWith('(') && trimmed.endsWith(')')) ||
-					// Check for patterns like "(min-width: 768px) and (max-width: 1024px)" which are already valid CSS
-					/^\([^)]+\)\s+(and|or)\s+\([^)]+\)/.test(trimmed)
-				);
-				const wrappedExpression = needsParentheses
-					? `(${condition.conditionExpression})`
-					: condition.conditionExpression;
-
-				const nativeCondition =
-					condition.conditionType === 'media'
-						? `@media ${wrappedExpression}`
-						: `@supports ${wrappedExpression}`;
-
-				const conditionalValue = value.replace(
-					ifFunc.fullFunction,
-					condition.value
-				);
-				nativeRules.push({
-					condition: nativeCondition,
-					rule: `${selector} { ${property}: ${conditionalValue}; }`
-				});
-			}
-		} catch (error) {
-			// If parsing fails, fall back to runtime processing
-			runtimeRules.push({
-				selector,
-				property,
-				value,
-				error: error.message
-			});
-		}
-	}
-
-	// Generate native CSS
-	let nativeCSS = '';
-	const fallbackRules = [];
-
-	for (const rule of nativeRules) {
-		if (rule.condition) {
-			nativeCSS += `${rule.condition} {\n  ${rule.rule}\n}\n`;
-		} else {
-			fallbackRules.push(rule.rule);
-		}
-	}
-
-	// Add fallback rules first (mobile-first approach)
-	if (fallbackRules.length > 0) {
-		nativeCSS = fallbackRules.join('\n') + '\n' + nativeCSS;
-	}
-
-	// Generate runtime CSS
-	let runtimeCSS = '';
-	if (runtimeRules.length > 0) {
-		runtimeCSS = runtimeRules
-			.map(
-				(rule) =>
-					`${rule.selector} { ${rule.property}: ${rule.value}; }`
-			)
-			.join('\n');
-	}
-
-	return {
-		nativeCSS: nativeCSS.trim(),
-		runtimeCSS: runtimeCSS.trim(),
-		hasRuntimeRules: runtimeRules.length > 0
-	};
-};
-
-/**
- * Parse a CSS declaration string into property-value pairs
- */
-const parseDeclaration = (declaration) => {
-	const colonIndex = declaration.indexOf(':');
-	if (colonIndex === -1) {
-		return null;
-	}
-
-	const property = declaration.slice(0, colonIndex).trim();
-	const value = declaration.slice(colonIndex + 1).trim();
-
-	if (property && value) {
-		return { property, value };
-	}
-
-	return null;
-};
-
-/**
- * Parse a CSS rule and extract selector and properties
- */
-const parseRule = (ruleText) => {
-	const openBrace = ruleText.indexOf('{');
-	const closeBrace = ruleText.lastIndexOf('}');
-
-	if (openBrace === -1 || closeBrace === -1) {
-		return null;
-	}
-
-	const selector = ruleText.slice(0, openBrace).trim();
-	const declarations = ruleText.slice(openBrace + 1, closeBrace).trim();
-
-	const properties = [];
-
-	// Parse declarations with proper handling of semicolons in parentheses
-	let currentDeclaration = '';
-	let depth = 0;
-	let inQuotes = false;
-	let quoteChar = '';
-
-	for (let i = 0; i < declarations.length; i++) {
-		const char = declarations[i];
-		const previousChar = i > 0 ? declarations[i - 1] : '';
-
-		// Handle quotes
-		if ((char === '"' || char === "'") && previousChar !== '\\') {
-			if (!inQuotes) {
-				inQuotes = true;
-				quoteChar = char;
-			} else if (char === quoteChar) {
-				inQuotes = false;
-				quoteChar = '';
-			}
+		if (!name) {
+			index = applyPos + 6;
+			continue;
 		}
 
-		if (!inQuotes) {
-			if (char === '(') {
-				depth++;
-			} else if (char === ')') {
-				depth--;
-			}
+		// Check for function arguments in parentheses
+		let args = [];
+		while (pos < bodyText.length && /\s/.test(bodyText[pos])) {
+			pos++;
 		}
 
-		if (char === ';' && depth === 0 && !inQuotes) {
-			// This is a real property separator
-			if (currentDeclaration.trim()) {
-				const parsed = parseDeclaration(currentDeclaration);
-				if (parsed) {
-					properties.push(parsed);
+		if (pos < bodyText.length && bodyText[pos] === '(') {
+			let argDepth = 0;
+			const argStart = pos + 1;
+			let argEnd = -1;
+
+			for (let i = pos; i < bodyText.length; i++) {
+				if (bodyText[i] === '(') {
+					argDepth++;
+				} else if (bodyText[i] === ')') {
+					argDepth--;
+					if (argDepth === 0) {
+						argEnd = i;
+						break;
+					}
 				}
 			}
 
-			currentDeclaration = '';
+			if (argEnd !== -1) {
+				const argumentsString = bodyText.slice(argStart, argEnd).trim();
+				if (argumentsString) {
+					args = splitArguments(argumentsString);
+				}
+
+				pos = argEnd + 1;
+			}
+		}
+
+		// Skip whitespace
+		while (pos < bodyText.length && /\s/.test(bodyText[pos])) {
+			pos++;
+		}
+
+		// Check for contents block
+		let contentsBlock = null;
+		let endPos;
+
+		if (pos < bodyText.length && bodyText[pos] === '{') {
+			// Parse contents block
+			let blockDepth = 0;
+			let blockEnd = -1;
+
+			for (let i = pos; i < bodyText.length; i++) {
+				if (bodyText[i] === '{') {
+					blockDepth++;
+				} else if (bodyText[i] === '}') {
+					blockDepth--;
+					if (blockDepth === 0) {
+						blockEnd = i;
+						break;
+					}
+				}
+			}
+
+			if (blockEnd !== -1) {
+				contentsBlock = bodyText.slice(pos + 1, blockEnd).trim();
+				endPos = blockEnd + 1;
+			} else {
+				endPos = pos;
+			}
+		} else if (pos < bodyText.length && bodyText[pos] === ';') {
+			endPos = pos + 1;
 		} else {
-			currentDeclaration += char;
+			// No semicolon or block - still valid per spec
+			endPos = pos;
 		}
+
+		applies.push({
+			start: applyPos,
+			end: endPos,
+			name,
+			args,
+			contentsBlock
+		});
+
+		index = endPos;
 	}
 
-	// Handle the last declaration
-	if (currentDeclaration.trim()) {
-		const parsed = parseDeclaration(currentDeclaration);
-		if (parsed) {
-			properties.push(parsed);
-		}
-	}
-
-	return {
-		selector,
-		properties
-	};
+	return applies;
 };
 
 /**
- * Transform CSS text to native CSS where possible
+ * Substitute mixin parameters into the result body.
+ * Replaces var(--paramName) with the argument value or default.
+ */
+const substituteParams = (body, params, args) => {
+	let result = body;
+
+	for (let i = 0; i < params.length; i++) {
+		const param = params[i];
+		const argValue = i < args.length ? args[i] : param.defaultValue;
+
+		if (argValue !== null && argValue !== undefined) {
+			// Replace var(--paramName) with the argument value
+			// Handle var(--paramName) and var(--paramName, fallback)
+			const varPattern = new RegExp(
+				`var\\(\\s*${param.name.replace('--', '--')}\\s*(?:,[^)]*)?\\)`,
+				'g'
+			);
+			result = result.replace(varPattern, argValue);
+		}
+	}
+
+	return result;
+};
+
+/**
+ * Process @apply rules within a body text, substituting mixin/macro content
+ */
+const processApplyInBody = (bodyText, definitions) => {
+	const applies = findApplyRules(bodyText);
+	if (applies.length === 0) {
+		return bodyText;
+	}
+
+	// Process from right to left to preserve string indices
+	let result = bodyText;
+	for (let i = applies.length - 1; i >= 0; i--) {
+		const apply = applies[i];
+		const definition = definitions.get(apply.name);
+
+		if (!definition) {
+			// Unknown mixin/macro - remove the @apply rule (produces nothing)
+			result = result.slice(0, apply.start) + result.slice(apply.end);
+			continue;
+		}
+
+		let substitution;
+
+		if (definition.type === 'macro') {
+			// Macro: direct substitution of body content
+			substitution = definition.body;
+			// Handle @contents substitution
+			substitution = substituteContents(
+				substitution,
+				apply.contentsBlock
+			);
+		} else {
+			// Mixin: substitute @result blocks with parameter handling
+			if (definition.resultBlocks.length === 0) {
+				// No @result blocks - mixin produces no output
+				result = result.slice(0, apply.start) + result.slice(apply.end);
+				continue;
+			}
+
+			// Concatenate all @result blocks
+			substitution = definition.resultBlocks.join('\n');
+
+			// Substitute parameters
+			if (definition.params.length > 0) {
+				substitution = substituteParams(
+					substitution,
+					definition.params,
+					apply.args
+				);
+			}
+
+			// Handle @contents substitution
+			substitution = substituteContents(
+				substitution,
+				apply.contentsBlock
+			);
+		}
+
+		// Recursively process any nested @apply rules in the substitution
+		substitution = processApplyInBody(substitution, definitions);
+
+		result =
+			result.slice(0, apply.start) +
+			substitution +
+			result.slice(apply.end);
+	}
+
+	return result;
+};
+
+/**
+ * Process a complete CSS rule, substituting any @apply rules within it
+ */
+const processRule = (ruleText, definitions) => {
+	const trimmed = ruleText.trim();
+
+	// Skip @mixin and @macro definitions (already extracted)
+	if (trimmed.startsWith('@mixin ') || trimmed.startsWith('@macro ')) {
+		return '';
+	}
+
+	// Find the body
+	const firstBrace = trimmed.indexOf('{');
+	if (firstBrace === -1) {
+		return ruleText; // Not a rule with braces, return as-is
+	}
+
+	const lastBrace = trimmed.lastIndexOf('}');
+	if (lastBrace === -1) {
+		return ruleText;
+	}
+
+	const selector = trimmed.slice(0, firstBrace).trim();
+	const body = trimmed.slice(firstBrace + 1, lastBrace);
+
+	// Process @apply rules in the body
+	const processedBody = processApplyInBody(body, definitions);
+
+	// If the body is empty after processing, skip the rule
+	if (!processedBody.trim()) {
+		return '';
+	}
+
+	return `${selector} {\n${processedBody}\n}`;
+};
+
+/**
+ * Transform CSS text containing @mixin/@macro/@apply into native CSS
  */
 const transformToNativeCSS = (cssText) => {
 	const rules = parseCSSRules(cssText);
-	let nativeCSS = '';
-	let runtimeCSS = '';
-	let hasRuntimeRules = false;
+	const definitions = new Map();
 
-	for (const ruleText of rules) {
-		const rule = parseRule(ruleText);
+	// Phase 1: Extract all @mixin and @macro definitions
+	for (const rule of rules) {
+		const trimmed = rule.trim();
 
-		if (!rule) {
-			// Keep non-rule content as-is
-			nativeCSS += ruleText + '\n';
-			continue;
-		}
-
-		let hasIfConditions = false;
-		const nonIfProperties = [];
-
-		for (const { property, value } of rule.properties) {
-			if (value.includes('if(')) {
-				hasIfConditions = true;
-				const transformed = transformPropertyToNative(
-					rule.selector,
-					property,
-					value
-				);
-
-				if (transformed.nativeCSS) {
-					nativeCSS += transformed.nativeCSS + '\n';
-				}
-
-				if (transformed.hasRuntimeRules) {
-					runtimeCSS += transformed.runtimeCSS + '\n';
-					hasRuntimeRules = true;
-				}
-			} else {
-				// Collect non-CSS mixinproperties to preserve them
-				nonIfProperties.push(`${property}: ${value}`);
+		if (trimmed.startsWith('@mixin ')) {
+			const definition = parseMixinDefinition(trimmed);
+			if (definition) {
+				// Per spec: later definitions overwrite earlier ones in same layer
+				definitions.set(definition.name, definition);
 			}
-		}
-
-		// If we have non-CSS mixinproperties in a rule that also has CSS mixinproperties,
-		// we need to create a base rule with those properties
-		if (hasIfConditions && nonIfProperties.length > 0) {
-			nativeCSS += `${rule.selector} { ${nonIfProperties.join('; ')}; }\n`;
-		} else if (!hasIfConditions) {
-			// Keep rules without CSS mixinconditions as-is
-			nativeCSS += ruleText + '\n';
+		} else if (trimmed.startsWith('@macro ')) {
+			const definition = parseMacroDefinition(trimmed);
+			if (definition) {
+				definitions.set(definition.name, definition);
+			}
 		}
 	}
 
+	// Phase 2: Process remaining rules, substituting @apply references
+	let nativeCSS = '';
+
+	for (const rule of rules) {
+		const trimmed = rule.trim();
+
+		// Skip definitions (already extracted)
+		if (trimmed.startsWith('@mixin ') || trimmed.startsWith('@macro ')) {
+			continue;
+		}
+
+		// Skip standalone comments
+		if (trimmed.startsWith('/*') && trimmed.endsWith('*/')) {
+			continue;
+		}
+
+		const processed = processRule(trimmed, definitions);
+		if (processed) {
+			nativeCSS += processed + '\n';
+		}
+	}
+
+	const totalRules = rules.filter(
+		(r) =>
+			!r.trim().startsWith('@mixin') &&
+			!r.trim().startsWith('@macro') &&
+			!r.trim().startsWith('/*')
+	).length;
+	const transformedApplyCount = (cssText.match(/@apply/g) || []).length;
+
 	return {
 		nativeCSS: nativeCSS.trim(),
-		runtimeCSS: runtimeCSS.trim(),
-		hasRuntimeRules,
+		runtimeCSS: '',
+		hasRuntimeRules: false,
 		stats: {
-			totalRules: rules.length,
-			transformedRules: rules.filter((rule) => rule.includes('if('))
-				.length
+			totalRules,
+			transformedRules: transformedApplyCount
 		}
 	};
 };
@@ -615,11 +753,7 @@ const transformToNativeCSS = (cssText) => {
  * Build-time transformation utility
  */
 const buildTimeTransform = (cssText, options = {}) => {
-	const {
-		_generateFallbacks = true,
-		_optimizeMediaQueries = true,
-		minify = false
-	} = options;
+	const { minify = false } = options;
 
 	const result = transformToNativeCSS(cssText);
 
@@ -635,34 +769,36 @@ const buildTimeTransform = (cssText, options = {}) => {
 };
 
 /**
- * Runtime transformation utility (for integration with existing polyfill)
+ * Runtime transformation utility (for integration with the browser polyfill)
  */
 const runtimeTransform = (cssText, element) => {
 	const result = transformToNativeCSS(cssText);
 
-	// Apply native CSS immediately if we have it
+	// Apply transformed CSS immediately if we have it
 	if (result.nativeCSS && element) {
 		const style = document.createElement('style');
 		style.textContent = result.nativeCSS;
-		style.dataset.cssIfNative = 'true';
+		style.dataset.cssMixinNative = 'true';
 		document.head.append(style);
 	}
 
-	// Return runtime CSS for further processing by the polyfill
 	return {
-		processedCSS: result.runtimeCSS,
-		hasRuntimeRules: result.hasRuntimeRules,
+		processedCSS: result.nativeCSS,
+		hasRuntimeRules: false,
 		nativeCSS: result.nativeCSS
 	};
 };
 
 export {
 	buildTimeTransform,
-	extractIfFunctions,
+	extractResultBlocks,
+	findApplyRules,
 	parseCSSRules,
-	parseIfFunction,
-	parseRule,
+	parseMacroDefinition,
+	parseMixinDefinition,
+	processApplyInBody,
 	runtimeTransform,
-	transformPropertyToNative,
+	substituteContents,
+	substituteParams,
 	transformToNativeCSS
 };
