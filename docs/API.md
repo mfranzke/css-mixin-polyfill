@@ -37,7 +37,7 @@ init();
 
 ## API Reference
 
-### Core Polyfill (`css-mixin-polyfill`)
+### Core Polyfill (`css-mixin-polyfill`) Methods
 
 #### `init(options?)`
 
