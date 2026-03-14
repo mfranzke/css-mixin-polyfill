@@ -774,7 +774,9 @@ const observeStylesheetChanges = () => {
  */
 const init = (options = {}) => {
 	if (globalThis.window === undefined) {
-		throw new TypeError('CSS cssmixinmacropolyfill requires a browser environment');
+		throw new TypeError(
+			'CSS cssmixinmacropolyfill requires a browser environment'
+		);
 	}
 
 	// Update global options

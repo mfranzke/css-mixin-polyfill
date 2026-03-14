@@ -78,13 +78,9 @@ const main = async () => {
 			);
 
 			if (result.hasRuntimeRules) {
-				console.log(
-					'  ⚠️  Some mixins require runtime processing'
-				);
+				console.log('  ⚠️  Some mixins require runtime processing');
 			} else {
-				console.log(
-					'  ✅ All mixins transformed to native CSS'
-				);
+				console.log('  ✅ All mixins transformed to native CSS');
 			}
 		}
 
