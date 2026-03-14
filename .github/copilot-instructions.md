@@ -1,4 +1,4 @@
-# GitHub Copilot Instructions for CSS cssMixinMacroPolyfill
+# GitHub Copilot Instructions for CSS Mixin and Macro Polyfill
 
 ## Project Overview
 
@@ -10,17 +10,17 @@ https://drafts.csswg.org/css-mixins/ -->
 ## Official WCAG CSS mixin and macro rule Specification
 
 5. Defining Mixins
-A mixin is in many ways similar to a custom function, but rather than extending/upgrading custom properties, mixins extend/upgrade nested style rules, making them reusable and customizable with arguments.
+   A mixin is in many ways similar to a custom function, but rather than extending/upgrading custom properties, mixins extend/upgrade nested style rules, making them reusable and customizable with arguments.
 
 For example, the following code sets up a mixin applying all the properties you need for a "gradient text" effect, including guarding it with supports queries:
 @mixin --gradient-text(
-  --from <color>: mediumvioletred,
-  --to <color>: teal,
-  --angle: to bottom right,
+--from <color>: mediumvioletred,
+--to <color>: teal,
+--angle: to bottom right,
 ) {
-  --gradient: linear-gradient(var(--angle), var(--from), var(--to));
-  @result {
-    color: var(--from, var(--to));
+--gradient: linear-gradient(var(--angle), var(--from), var(--to));
+@result {
+color: var(--from, var(--to));
 
     @supports (background-clip: text) or (-webkit-background-clip: text) {
       background: var(--gradient, var(--from));
@@ -28,40 +28,41 @@ For example, the following code sets up a mixin applying all the properties you 
       -webkit-background-clip: text;
       background-clip: text;
     }
-  }
+
+}
 }
 
 h1 {
-  @apply --gradient-text(pink, powderblue);
+@apply --gradient-text(pink, powderblue);
 }
 Note that this example also uses a local variable --gradient, which is accessible inside the mixin to aid in readability, but won’t pollute the element’s actual styles.
 
 This is roughly equivalent to writing a nested style rule literally into the `h1` styles:
 
 h1 {
-  --from: pink;
-  --to: powderblue;
-  --angle: to bottom right;
-  color: var(--from, var(--to));
+--from: pink;
+--to: powderblue;
+--angle: to bottom right;
+color: var(--from, var(--to));
 
-  @supports (background-clip: text) or (-webkit-background-clip: text) {
-    --gradient: linear-gradient(var(--angle), var(--from), var(--to));
-    background: var(--gradient, var(--from));
-    color: transparent;
-    -webkit-background-clip: text;
-    background-clip: text;
-  }
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+--gradient: linear-gradient(var(--angle), var(--from), var(--to));
+background: var(--gradient, var(--from));
+color: transparent;
+-webkit-background-clip: text;
+background-clip: text;
+}
 }
 (except that none of those custom properties actually show up in the element’s styles)
 
- The entire @mixin feature is experimental and under active development, and is much less stable than @function. Expect things to change frequently for now.
+The entire @mixin feature is experimental and under active development, and is much less stable than @function. Expect things to change frequently for now.
 
 5.1. The @mixin rule
 The @mixin rule defines a mixin, and consists of a name, a list of mixin parameters, and a mixin body. (Identical to @function, save that it lacks a return type.)
 
 <@mixin> = @mixin <function-token> <function-parameter>#? )
 {
-  <declaration-rule-list>
+<declaration-rule-list>
 }
 
 If a default value and a parameter type are both provided, then the default value must parse successfully according to that parameter type’s syntax. Otherwise, the @mixin rule is invalid.
@@ -90,7 +91,7 @@ Unknown properties and rules are invalid and ignored, but do not make the @mixin
 Within a @mixin rule, the @result rule specifies the mixin result, a nested declarations rule similar to the result descriptor in custom functions. It’s what the @apply rule will be substituted with.
 
 <@result> = @result {
-  <declaration-rule-list>
+<declaration-rule-list>
 }
 The body of a @result rule acts as a nested declarations rule, and accepts the same properties and rules that a normal nested declarations rule would. In particular, further mixins can be invoked (via the @apply rule) within a @result.
 
@@ -111,16 +112,16 @@ Just like in custom functions, earlier things in that list "win" over later thin
 
 For example, the following mixin use:
 @mixin --shadowed-values(--color2: green, --color3: green) {
-  --color3: blue;
-  @result {
-    background: linear-gradient(var(--color1), var(--color2), var(--color3));
-  }
+--color3: blue;
+@result {
+background: linear-gradient(var(--color1), var(--color2), var(--color3));
+}
 }
 p {
-  --color1: red;
-  --color2: red;
-  --color3: red;
-  @apply --shadowed-values();
+--color1: red;
+--color2: red;
+--color3: red;
+@apply --shadowed-values();
 }
 will produce a linear-gradient(red, green, blue) value, taking --color-1 from the outside (since nothing overrides it), --color2 from the mixin parameter (overriding the value from the element), and --color3 from the local variable in the mixin body (overriding both the value from the element and the mixin parameter of that name).
 
@@ -143,34 +144,34 @@ Note: For example, the inherit() function intrinsically reaches outside of the c
 
 For example, given the following styles and mixin:
 @mixin --triple-border(--size <length>) {
-  @result {
-    &, & > *, & > * > * {
-      border-width: var(--size);
-    }
-  }
+@result {
+&, & > _, & > _ > \* {
+border-width: var(--size);
+}
+}
 }
 section {
-  @apply --triple-border(5px);
+@apply --triple-border(5px);
 }
 section > h1 {
-  --size: 10px;
+--size: 10px;
 }
 section > h1 > small {
-  --size: 20px;
+--size: 20px;
 }
 The mixin parameter --size is hygienically renamed, resulting in the applied styles being equivalent to something like:
 
 section {
-  --f7bd60b7: 5px;
-  border-width: var(--f7bd60b7);
+--f7bd60b7: 5px;
+border-width: var(--f7bd60b7);
 }
 section > h1 {
-  --size: 10px;
-  border-width: var(--f7bd60b7);
+--size: 10px;
+border-width: var(--f7bd60b7);
 }
 section > h1 > small {
-  --size: 20px;
-  border-width: var(--f7bd60b7);
+--size: 20px;
+border-width: var(--f7bd60b7);
 }
 Even though the child and grandchild elements set the same custom property as the mixin result, they don’t influence the result. Instead, the mixin result is changed to reference an un-clashable variable name, allowing inheritance to safely transmit the original value to the descendants, ensuring that all three borders are the same size, as the author intended.
 
@@ -178,57 +179,57 @@ Note: While hygienic renaming ensures that descendants won’t accidentally pick
 
 For example, in the following variant of the previous example:
 @mixin --triple-border() {
-  @result {
-    &, & > *, & > * > * {
-      border-width: .2em;
-    }
-  }
+@result {
+&, & > _, & > _ > \* {
+border-width: .2em;
+}
+}
 }
 section {
-  font-size: 10px;
-  @apply --triple-border;
+font-size: 10px;
+@apply --triple-border;
 }
 section > h1 {
-  font-size: 20px;
+font-size: 20px;
 }
 section > h1 > small {
-  font-size: 15px;
+font-size: 15px;
 }
 The applied mixin will be equivalent to:
 
 section {
-  font-size: 10px;
-  border-width: .2em;
+font-size: 10px;
+border-width: .2em;
 }
 section > h1 {
-  font-size: 20px
-  border-width: .2em;
+font-size: 20px
+border-width: .2em;
 }
 section > h1 > small {
-  font-size: 15px;
-  border-width: .2em;
+font-size: 15px;
+border-width: .2em;
 }
 Which will give three different border-width values: 2px, 4px, and 3px.
 
-This is likely often a desirable behavior, but if it’s not, we should have a workaround. The following *doesn’t* work, due to the mixin body becoming the function body of an anonymous function, which is evaluated on each element and thus inherits that element’s em length.
+This is likely often a desirable behavior, but if it’s not, we should have a workaround. The following _doesn’t_ work, due to the mixin body becoming the function body of an anonymous function, which is evaluated on each element and thus inherits that element’s em length.
 
 @function --as-length(--x <length>) returns <length> { result: var(--x); }
 @mixin --triple-border() {
-  --em: --as-length(1em);
-  @result {
-    &, & > *, & > * > * {
-      border-width: calc(0.2 * var(--em));
-    }
-  }
+--em: --as-length(1em);
+@result {
+&, & > _, & > _ > _ {
+border-width: calc(0.2 _ var(--em));
+}
+}
 }
 I think the only way that works is to have an extra argument that you don’t expect the user to pass, since arguments get lifted onto the applying element and hygienically renamed:
 
 @mixin --triple-border(--em <length>: 1em) {
-  @result {
-    &, & > *, & > * > * {
-      border-width: calc(0.2 * var(--em));
-    }
-  }
+@result {
+&, & > _, & > _ > _ {
+border-width: calc(0.2 _ var(--em));
+}
+}
 }
 But this is clumsy. :(
 
@@ -253,51 +254,50 @@ Note: It’s valid for an @apply rule to pass a contents block, but the mixin no
 
 For example, the following mixins abstracts the cases that the page would consider to be appropriate for a "single column" layout, allowing the rest of the page to handle the case without worrying about the details, so the conditions can be adjusted in the future if necessary:
 @mixin --one-column() {
-  @result {
-    @media (width <= 800px) {
-      @contents;
-    }
-  }
+@result {
+@media (width <= 800px) {
+@contents;
+}
+}
 }
 @mixin --two-column() {
-  @result {
-    @media (width > 800px) {
-      @contents;
-    }
-  }
+@result {
+@media (width > 800px) {
+@contents;
+}
+}
 }
 body {
-  @apply --one-column {
-    display: flex;
-    flex-flow: column;
-  }
-  @apply --two-column {
-    display: grid;
-    grid-template-columns: ;
-  }
+@apply --one-column {
+display: flex;
+flex-flow: column;
 }
-6. Defining Macros
+@apply --two-column {
+display: grid;
+grid-template-columns: ;
+}
+} 6. Defining Macros
 A macro is a simplified variant of a mixin, that very directly substitutes its body into its @apply-ing rule.
 
 It does not take any arguments (besides possibly a @contents block) or define local variables (and thus doesn’t use a @result rule to separate its result from its (nonexistent) body) and does not impose a "scoping" semantic on its result rules. Otherwise, it is identical to a mixin.
 
 For simple mixins that are just meant to make it easier to include a commonly-repeated block of styles, macros can be slightly shorter/easier to use:
 @macro --reset-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
+margin: 0;
+padding: 0;
+list-style: none;
 }
 .foo {
-  @apply --reset-list;
+@apply --reset-list;
 }
-In cases like this, the *result* of defining this as a mixin or macro are identical. That is, one could equally write this slightly more verbose definition:
+In cases like this, the _result_ of defining this as a mixin or macro are identical. That is, one could equally write this slightly more verbose definition:
 
 @mixin --reset-list() {
-  @result {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
+@result {
+margin: 0;
+padding: 0;
+list-style: none;
+}
 }
 In more complex cases, though, their behaviors can differ; see § 7.4 Mixin/Macro Differences.
 
@@ -306,7 +306,7 @@ The @macro rule defines a macro, and consists of a name and a macro body. (Simil
 
 <@macro> = @macro <dashed-ident>
 {
-  <declaration-rule-list>
+<declaration-rule-list>
 }
 A @macro rule cannot be a nested group rule; it is invalid within the body of a style rule.
 
@@ -326,26 +326,25 @@ Identically to mixins, the body of a @macro rule can contain a @contents rule, w
 
 The @contents example provided in § 5.4 The @contents Rule used @mixin, but it could equally be written with @macro, as it does not use any arguments:
 @macro --one-column {
-  @media (width <= 800px) {
-    @contents;
-  }
+@media (width <= 800px) {
+@contents;
+}
 }
 @macro --two-column {
-  @media (width > 800px) {
-    @contents;
-  }
+@media (width > 800px) {
+@contents;
+}
 }
 body {
-  @apply --one-column {
-    display: flex;
-    flex-flow: column;
-  }
-  @apply --two-column {
-    display: grid;
-    grid-template-columns: ;
-  }
+@apply --one-column {
+display: flex;
+flex-flow: column;
 }
-7. Using Mixins and Macros
+@apply --two-column {
+display: grid;
+grid-template-columns: ;
+}
+} 7. Using Mixins and Macros
 The result of a mixin or macro application is substituted into the body of another style rule as a nested declarations rule via the @apply rule.
 
 7.1. The @apply Rule
@@ -357,17 +356,17 @@ Its grammar is:
 
 For example, a mixin can be applied in any of these ways:
 .foo {
-  @apply --one;
-  /* Invokes the --one mixin, with no arguments or contents. */
+@apply --one;
+/_ Invokes the --one mixin, with no arguments or contents. _/
 
-  @apply --two(blue);
-  /* Invokes --two with one argument, and no contents. */
+@apply --two(blue);
+/_ Invokes --two with one argument, and no contents. _/
 
-  @apply --three {color: red;}
-  /* Invokes --three with no arguments, but with contents. */
+@apply --three {color: red;}
+/_ Invokes --three with no arguments, but with contents. _/
 
-  @apply --four(blue) {color: red;}
-  /* Invokes --four with both an argument and contents. */
+@apply --four(blue) {color: red;}
+/_ Invokes --four with both an argument and contents. _/
 }
 The @apply rule is only valid in the body of a style rule or nested group rule; using it in any other context causes it to be invalid and ignored.
 
@@ -381,27 +380,27 @@ If the @apply rule has a <declaration-list> block, that block is passed as the m
 
 Applying a mixin without arguments, or with an empty argument list, is identical. That is, these two invocations do exactly the same thing:
 .foo {
-  @apply --no-args;
+@apply --no-args;
 }
 .bar {
-  @apply --no-args();
+@apply --no-args();
 }
 Passing a contents block is not the same; omitting the block entirely triggers @contents fallback, while passing an empty block will substitute the empty block:
 
 @mixin --just-contents() {
-  @result {
-    @contents { color: red; }
-    /* `color: red` is the fallback content */
-  }
+@result {
+@contents { color: red; }
+/_ `color: red` is the fallback content _/
+}
 }
 
 .foo {
-  @apply --just-contents;
-  /* fallback, substitutes with `color: red;` */
+@apply --just-contents;
+/_ fallback, substitutes with `color: red;` _/
 }
 .bar {
-  @apply --just-contents {};
-  /* substitutes with nothing at all */
+@apply --just-contents {};
+/_ substitutes with nothing at all _/
 }
 7.2. Evaluating Mixins
 At a high level, mixins are applied by substituting their contents at the location they’re @apply'd.
@@ -424,184 +423,184 @@ Each anonymous function invocation has its arguments set to var() functions refe
 
 For example, given the following mixin:
 @mixin --same-size(--size <length>) {
-  @result {
-    &, & > * {
-      width: calc(10 * var(--size));
-    }
-  }
+@result {
+&, & > _ {
+width: calc(10 _ var(--size));
+}
+}
 }
 .parent {
-  font-size: 10px;
-  @apply --same-size(1em);
+font-size: 10px;
+@apply --same-size(1em);
 }
 .parent > .child {
-  font-size: 20px;
+font-size: 20px;
 }
 This will desugar into approximately:
 
 @property --magic-arg1 {
-  syntax: "<length>";
-  inherits: true;
-  /* initial-value: don't worry about it; */
+syntax: "<length>";
+inherits: true;
+/_ initial-value: don't worry about it; _/
 }
 @function --anonfunc1(--arg1) {
-  result: calc(10 * var(--arg1));
+result: calc(10 _ var(--arg1));
 }
 @function --anonfunc2(--arg1) {
-  result: calc(10 * var(--arg1));
+result: calc(10 _ var(--arg1));
 }
 .parent {
-  font-size: 10px;
-  --magic-arg1: 1em; /* resolves based on font-size here */
-  width: --anonfunc1(var(--magic-arg1));
+font-size: 10px;
+--magic-arg1: 1em; /_ resolves based on font-size here _/
+width: --anonfunc1(var(--magic-arg1));
 }
 .parent > .child {
-  font-size: 20px;
-  width: --anonfunc2(var(--magic-arg1));
-  /* --magic-arg1 is 10px, since it was resolved on the parent */
+font-size: 20px;
+width: --anonfunc2(var(--magic-arg1));
+/_ --magic-arg1 is 10px, since it was resolved on the parent _/
 }
 Note: In practice, this anonymous custom function can usually be completely hypothetical, and a direct substitution used instead. It’s required only to make variables and other element-relative values resolve correctly.
 
 When mixins are nested (one invoked via @apply inside the @result of another), the desugaring nests as well, in the obvious way. For example:
 div {
-  @apply --colorized-squish(tomato);
+@apply --colorized-squish(tomato);
 }
 
-/* "wraps" an element in colored arrows */
+/_ "wraps" an element in colored arrows _/
 @mixin --squish(--left-color <color>,
-                --right-color <color>: var(--left-color)) {
-  @result {
-    &::before {
-      content: "🡆";
-      background-color: var(--left-color);
-    }
-    &::after {
-      content: "🡄";
-      background-color: var(--right-color);
-    }
-  }
+--right-color <color>: var(--left-color)) {
+@result {
+&::before {
+content: "🡆";
+background-color: var(--left-color);
+}
+&::after {
+content: "🡄";
+background-color: var(--right-color);
+}
+}
 }
 
-/* colors the element, and auto-generates a border color
-   and the "squish" colors from it */
+/_ colors the element, and auto-generates a border color
+and the "squish" colors from it _/
 @mixin --colorized-squish(--color <color>) {
-  @result {
-    background-color: var(--color);
-    border: 2px solid oklch(from var(--color) calc(l - 0.1) c h);
-    @apply --squish(oklch(from var(--color) calc(l - 0.3) c h),
-                    oklch(from var(--color) calc(l - 0.2) c h));
-  }
+@result {
+background-color: var(--color);
+border: 2px solid oklch(from var(--color) calc(l - 0.1) c h);
+@apply --squish(oklch(from var(--color) calc(l - 0.3) c h),
+oklch(from var(--color) calc(l - 0.2) c h));
+}
 }
 This desugars in two steps, inside-out. First, the --squish() is unfolded into the --colorized-squish() mixin:
 
 div {
-  @apply --colorized-squish(tomato);
+@apply --colorized-squish(tomato);
 }
 
 @mixin --colorized-squish(--color <color>) {
-  /* Lift the `@apply squish();` arguments out into local vars */
-  --s-arg1: oklch(from var(--color) calc(l - 0.3) c h);
-  --s-arg2: oklch(from var(--color) calc(l - 0.2) c h);
-  @result {
-    background-color: var(--color);
-    border: 2px solid oklch(from var(--color) calc(l - 0.1) c h);
-    /* Replace the `@apply --squish();` with its @result,
-       transformed to wrap the property values in
-       anonymous functions. */
-    &::before {
-      content: --s1(var(--s-arg1), var(--s-arg2));
-      background-color: --s2(var(--s-arg1), var(--s-arg2));
-    }
-    &::after {
-      content: --s3(var(--s-arg1), var(--s-arg2));
-      background-color: --s4(var(--s-arg1), var(--s-arg2));
-    }
-  }
+/_ Lift the `@apply squish();` arguments out into local vars _/
+--s-arg1: oklch(from var(--color) calc(l - 0.3) c h);
+--s-arg2: oklch(from var(--color) calc(l - 0.2) c h);
+@result {
+background-color: var(--color);
+border: 2px solid oklch(from var(--color) calc(l - 0.1) c h);
+/_ Replace the `@apply --squish();` with its @result,
+transformed to wrap the property values in
+anonymous functions. _/
+&::before {
+content: --s1(var(--s-arg1), var(--s-arg2));
+background-color: --s2(var(--s-arg1), var(--s-arg2));
+}
+&::after {
+content: --s3(var(--s-arg1), var(--s-arg2));
+background-color: --s4(var(--s-arg1), var(--s-arg2));
+}
+}
 }
 @function --s1(--left-color <color>,
-               --right-color <color>: var(--left-color)) {
-  result: "🡆";
+--right-color <color>: var(--left-color)) {
+result: "🡆";
 }
 @function --s2(--left-color <color>,
-               --right-color <color>: var(--left-color)) {
-  result: var(--left-color);
+--right-color <color>: var(--left-color)) {
+result: var(--left-color);
 }
 @function --s3(--left-color <color>,
-               --right-color <color>: var(--left-color)) {
-  result: "🡄";
+--right-color <color>: var(--left-color)) {
+result: "🡄";
 }
 @function --s4(--left-color <color>,
-               --right-color <color>: var(--left-color)) {
-  result: var(--right-color);
+--right-color <color>: var(--left-color)) {
+result: var(--right-color);
 }
 Then the --colorized-squish() mixin is unfolded into the div rule:
 
 div {
-  /* Lift the `@apply --colorized-squish();` argument out into a var */
-  --cs-arg1: tomato;
-  /* Replace the `@apply --colorized-squish();` with (part of)
-     its @result, again with values wrapped in anonymous functions. */
-  background-color: --cs1(var(--cs-arg1));
-  border: --cs2(var(--cs-arg1));
-  &::before {
-    /* Note that --cs-arg1 is inherited here from div */
-    content: --cs3(var(--cs-arg1));
-    background-color: --cs4(var(--cs-arg1));
-  }
-  &::after {
-    content: --cs5(var(--cs-arg1));
-    background-color: --cs6(var(--cs-arg1));
-  }
+/_ Lift the `@apply --colorized-squish();` argument out into a var _/
+--cs-arg1: tomato;
+/_ Replace the `@apply --colorized-squish();` with (part of)
+its @result, again with values wrapped in anonymous functions. _/
+background-color: --cs1(var(--cs-arg1));
+border: --cs2(var(--cs-arg1));
+&::before {
+/_ Note that --cs-arg1 is inherited here from div _/
+content: --cs3(var(--cs-arg1));
+background-color: --cs4(var(--cs-arg1));
+}
+&::after {
+content: --cs5(var(--cs-arg1));
+background-color: --cs6(var(--cs-arg1));
+}
 }
 @function --cs1(--color <color>) {
-  result: var(--color);
+result: var(--color);
 }
 @function --cs2(--color <color>) {
-  result: 2px solid oklch(from var(--color) calc(l - 0.1) c h);
+result: 2px solid oklch(from var(--color) calc(l - 0.1) c h);
 }
 
-/* These four generated functions all look identical, they
-   just call into the correct generated function from
-   --squish()'s unfolding. */
+/_ These four generated functions all look identical, they
+just call into the correct generated function from
+--squish()'s unfolding. _/
 @function --cs3(--color <color>) {
-  /* The --colorized-squish() local vars (created by the
-    first desugaring) are turned into function local vars. */
-  --s-arg1: oklch(from var(--color) calc(l - 0.3) c h);
-  --s-arg2: oklch(from var(--color) calc(l - 0.2) c h);
-  result: --s1(var(--s-arg1), var(--s-arg2));
+/_ The --colorized-squish() local vars (created by the
+first desugaring) are turned into function local vars. _/
+--s-arg1: oklch(from var(--color) calc(l - 0.3) c h);
+--s-arg2: oklch(from var(--color) calc(l - 0.2) c h);
+result: --s1(var(--s-arg1), var(--s-arg2));
 }
 @function --cs4(--color <color>) {
-  --s-arg1: oklch(from var(--color) calc(l - 0.3) c h);
-  --s-arg2: oklch(from var(--color) calc(l - 0.2) c h);
-  result: --s2(var(--s-arg1), var(--s-arg2));
+--s-arg1: oklch(from var(--color) calc(l - 0.3) c h);
+--s-arg2: oklch(from var(--color) calc(l - 0.2) c h);
+result: --s2(var(--s-arg1), var(--s-arg2));
 }
 @function --cs5(--color <color>) {
-  --s-arg1: oklch(from var(--color) calc(l - 0.3) c h);
-  --s-arg2: oklch(from var(--color) calc(l - 0.2) c h);
-  result: --s3(var(--s-arg1), var(--s-arg2));
+--s-arg1: oklch(from var(--color) calc(l - 0.3) c h);
+--s-arg2: oklch(from var(--color) calc(l - 0.2) c h);
+result: --s3(var(--s-arg1), var(--s-arg2));
 }
 @function --cs6(--color <color>) {
-  --s-arg1: oklch(from var(--color) calc(l - 0.3) c h);
-  --s-arg2: oklch(from var(--color) calc(l - 0.2) c h);
-  result: --s4(var(--s-arg1), var(--s-arg2));
+--s-arg1: oklch(from var(--color) calc(l - 0.3) c h);
+--s-arg2: oklch(from var(--color) calc(l - 0.2) c h);
+result: --s4(var(--s-arg1), var(--s-arg2));
 }
 
-/* These are copied from the previous desugaring */
+/_ These are copied from the previous desugaring _/
 @function --s1(--left-color <color>,
-               --right-color <color>: var(--left-color)) {
-  result: "🡆";
+--right-color <color>: var(--left-color)) {
+result: "🡆";
 }
 @function --s2(--left-color <color>,
-               --right-color <color>: var(--left-color)) {
-  result: var(--left-color);
+--right-color <color>: var(--left-color)) {
+result: var(--left-color);
 }
 @function --s3(--left-color <color>,
-               --right-color <color>: var(--left-color)) {
-  result: "🡄";
+--right-color <color>: var(--left-color)) {
+result: "🡄";
 }
 @function --s4(--left-color <color>,
-               --right-color <color>: var(--left-color)) {
-  result: var(--right-color);
+--right-color <color>: var(--left-color)) {
+result: var(--right-color);
 }
 Note that all the custom property and function names are given short, somewhat meaningful names here, for readability, but actually are hygienically renamed and guaranteed to be unreferencable by author code. Only the user agent ever sees or can use them, to do this desugaring.
 
@@ -620,73 +619,79 @@ The subtler difference is that, because mixins have arguments and local variable
 
 For example, the following mixin and macro are identical:
 @mixin --mix1() {
-  @result {
-    width: 20em;
-    > .bar {
-      width: 10em;
-    }
-  }
+@result {
+width: 20em; > .bar {
+width: 10em;
+}
+}
 }
 @macro --mac1() {
-  width: 20em;
-  > .bar {
+width: 20em;
+
+> .bar {
+
     width: 10em;
-  }
+
+}
 }
 .foo {
-  @apply --mix1; /* or --mac1 */
-  font-size: 20px;
-  /* width is 20em, so 400px */
+@apply --mix1; /_ or --mac1 _/
+font-size: 20px;
+/_ width is 20em, so 400px _/
 
-  > .bar {
+> .bar {
+
     font-size: 10px;
     /* width is 10em, so 100px;
-  }
+
 }
-Despite the mixin/macro *appearing* to set the .bar child to half the .foo parent’s width, because they use em units and the elements have different font-size values, the child ends up 1/4 the width of the parent instead.
+}
+Despite the mixin/macro _appearing_ to set the .bar child to half the .foo parent’s width, because they use em units and the elements have different font-size values, the child ends up 1/4 the width of the parent instead.
 
 The mixin could be rewritten like this:
 
 @function --as-length(--x <length>) { result: var(--x); }
 @mixin --mix2() {
-  --em: --as-length(1em);
-  @result {
-    width: 20--em; /* using custom units */
-    > .bar {
-      width: 10--em;
-    }
-  }
+--em: --as-length(1em);
+@result {
+width: 20--em; /_ using custom units _/ > .bar {
+width: 10--em;
+}
+}
 }
 .foo {
-  @apply --mix2;
-  font-size: 20px;
-  /* width is 20--em and --em is 20px, so 400px */
+@apply --mix2;
+font-size: 20px;
+/_ width is 20--em and --em is 20px, so 400px _/
 
-  > .bar {
+> .bar {
+
     font-size: 10px;
     /* width is 10--em and --em is still 20px, so 200px;
-  }
+
+}
 }
 ...which resolves the --em local variable on .foo (to a length of 20px), and then uses that in both places. A macro cannot reproduce this, unless you actually emit a --em custom property onto the element, where styles outside of the macro could see it.
 
 On the other hand, the following can be done with a macro:
 
 @macro --mac2() {
-  width: 20em;
-  + .bar { /* sibling, not child! */
-    width: 10em;
+width: 20em;
+
+- .bar { /_ sibling, not child! _/
+  width: 10em;
   }
-}
-.foo {
+  }
+  .foo {
   @apply --mac2;
   font-size: 20px;
-  /* width is 20em, so 400px */
-  + .bar { /* again, sibling! */
-    font-size: 10px;
-    /* width is 10em, so 100px;
+  /_ width is 20em, so 400px _/
+- .bar { /_ again, sibling! _/
+  font-size: 10px;
+  /\* width is 10em, so 100px;
   }
-}
-A mixin can’t reproduce this, unless you lift it up to applying on a parent element, with the mixin styling its two children.
+  }
+  A mixin can’t reproduce this, unless you lift it up to applying on a parent element, with the mixin styling its two children.
 
 ## Project Structure and Key Components
 
