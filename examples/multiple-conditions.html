@@ -1,381 +1,399 @@
 <!doctype html>
 <html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>CSS Mixin/Macro Polyfill - Multiple @apply Examples</title>
+		<!-- Favicon for older Browsers -->
+		<link rel="icon" type="image/x-icon" href="../favicon.ico" />
+		<!-- SVG-Favicon for modern browsers -->
+		<link rel="icon" type="image/svg+xml" href="../favicon.svg" />
 
-<head>
-	<meta charset="UTF-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>CSS Mixin/Macro Polyfill - Multiple @apply Examples</title>
-	<!-- Favicon for older Browsers -->
-	<link rel="icon" type="image/x-icon" href="../favicon.ico" />
-	<!-- SVG-Favicon for modern browsers -->
-	<link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+		<!-- PNG-Favicons for High-DPI (Retina) Displays -->
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="32x32"
+			href="../favicon-32x32.png"
+		/>
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="16x16"
+			href="../favicon-16x16.png"
+		/>
+		<style>
+			body {
+				font-family:
+					system-ui,
+					-apple-system,
+					sans-serif;
+				margin: 0;
+				padding: 20px;
+				background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+				min-height: 100vh;
+			}
 
-	<!-- PNG-Favicons for High-DPI (Retina) Displays -->
-	<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
-	<link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
-	<style>
-		body {
-			font-family:
-				system-ui,
-				-apple-system,
-				sans-serif;
-			margin: 0;
-			padding: 20px;
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-			min-height: 100vh;
-		}
+			.container {
+				max-width: 1200px;
+				margin: 0 auto;
+				background: rgba(255, 255, 255, 0.95);
+				padding: 40px;
+				border-radius: 20px;
+				box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+			}
 
-		.container {
-			max-width: 1200px;
-			margin: 0 auto;
-			background: rgba(255, 255, 255, 0.95);
-			padding: 40px;
-			border-radius: 20px;
-			box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-		}
+			h1 {
+				text-align: center;
+				color: #333;
+				margin-bottom: 40px;
+				font-size: 2.5em;
+			}
 
-		h1 {
-			text-align: center;
-			color: #333;
-			margin-bottom: 40px;
-			font-size: 2.5em;
-		}
+			.demo-section {
+				margin-bottom: 50px;
+				padding: 30px;
+				background: #f8f9fa;
+				border-radius: 15px;
+				border-left: 5px solid #007acc;
+			}
 
-		.demo-section {
-			margin-bottom: 50px;
-			padding: 30px;
-			background: #f8f9fa;
-			border-radius: 15px;
-			border-left: 5px solid #007acc;
-		}
+			.demo-section h2 {
+				color: #007acc;
+				margin-top: 0;
+			}
 
-		.demo-section h2 {
-			color: #007acc;
-			margin-top: 0;
-		}
+			.code-block {
+				background: #2d3748;
+				color: #e2e8f0;
+				padding: 20px;
+				border-radius: 10px;
+				font-family: "Courier New", monospace;
+				margin: 15px 0;
+				overflow-x: auto;
+				white-space: pre-wrap;
+			}
 
-		.code-block {
-			background: #2d3748;
-			color: #e2e8f0;
-			padding: 20px;
-			border-radius: 10px;
-			font-family: "Courier New", monospace;
-			margin: 15px 0;
-			overflow-x: auto;
-			white-space: pre-wrap;
-		}
+			.example-result {
+				padding: 20px;
+				border: 2px solid #007acc;
+				border-radius: 10px;
+				background: white;
+				margin: 15px 0;
+			}
 
-		.example-result {
-			padding: 20px;
-			border: 2px solid #007acc;
-			border-radius: 10px;
-			background: white;
-			margin: 15px 0;
-		}
-
-		/* =============================================
+			/* =============================================
 		   Mixin and Macro Definitions
 		   ============================================= */
 
-		/* Spacing macro */
-		@macro --card-spacing {
-			padding: 30px;
-			margin: 20px 0;
-		}
-
-		/* Gradient background mixin */
-		@mixin --gradient-bg(--from <color>: #caf0f8, --to <color>: white) {
-			@result {
-				background: linear-gradient(135deg, var(--from), var(--to), var(--from));
+			/* Spacing macro */
+			@macro --card-spacing {
+				padding: 30px;
+				margin: 20px 0;
 			}
-		}
 
-		/* Typography mixin */
-		@mixin --heading-style(--size: 24px, --weight: 600, --color: #333) {
-			@result {
-				font-size: var(--size);
-				font-weight: var(--weight);
-				color: var(--color);
-			}
-		}
-
-		/* Border accent mixin */
-		@mixin --border-accent(--width: 3px, --style: solid, --color: #0ea5e9) {
-			@result {
-				border: var(--width) var(--style) var(--color);
-				border-radius: 8px;
-			}
-		}
-
-		/* Rounded corners macro */
-		@macro --rounded {
-			border-radius: 15px;
-			overflow: hidden;
-		}
-
-		/* Shadow depth macro */
-		@macro --shadow-depth {
-			box-shadow:
-				0 4px 6px rgba(0, 0, 0, 0.07),
-				0 10px 20px rgba(0, 0, 0, 0.04);
-		}
-
-		/* Text centering macro */
-		@macro --centered-text {
-			text-align: center;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-		}
-
-		/* Responsive padding mixin */
-		@mixin --responsive-padding(--large: 40px, --medium: 30px, --small: 15px) {
-			@result {
-				padding: var(--small);
-
-				@media (width >=480px) {
-					padding: var(--medium);
-				}
-
-				@media (width >=1200px) {
-					padding: var(--large);
+			/* Gradient background mixin */
+			@mixin --gradient-bg(--from <color>: #caf0f8, --to <color>: white) {
+				@result {
+					background: linear-gradient(
+						135deg,
+						var(--from),
+						var(--to),
+						var(--from)
+					);
 				}
 			}
-		}
 
-		/* Responsive font mixin */
-		@mixin --responsive-font(--large: 20px, --medium: 18px, --small: 14px) {
-			@result {
-				font-size: var(--small);
-
-				@media (width >=480px) {
-					font-size: var(--medium);
-				}
-
-				@media (width >=1200px) {
-					font-size: var(--large);
+			/* Typography mixin */
+			@mixin --heading-style(--size: 24px, --weight: 600, --color: #333) {
+				@result {
+					font-size: var(--size);
+					font-weight: var(--weight);
+					color: var(--color);
 				}
 			}
-		}
 
-		/* Hover transition macro */
-		@macro --smooth-hover {
-			transition: all 0.3s ease;
-			cursor: pointer;
-		}
-
-		/* Scale on hover macro */
-		@macro --hover-scale {
-			transform: scale(1.05);
-		}
-
-		/* Motion-safe transition mixin */
-		@mixin --motion-safe-transition(--duration: 0.3s, --easing: ease) {
-			@result {
-				transition: all var(--duration) var(--easing);
-
-				@media (prefers-reduced-motion: reduce) {
-					transition: none;
+			/* Border accent mixin */
+			@mixin --border-accent(
+				--width: 3px,
+				--style: solid,
+				--color: #0ea5e9
+			) {
+				@result {
+					border: var(--width) var(--style) var(--color);
+					border-radius: 8px;
 				}
 			}
-		}
 
-		/* =============================================
+			/* Rounded corners macro */
+			@macro --rounded {
+				border-radius: 15px;
+				overflow: hidden;
+			}
+
+			/* Shadow depth macro */
+			@macro --shadow-depth {
+				box-shadow:
+					0 4px 6px rgba(0, 0, 0, 0.07),
+					0 10px 20px rgba(0, 0, 0, 0.04);
+			}
+
+			/* Text centering macro */
+			@macro --centered-text {
+				text-align: center;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+
+			/* Responsive padding mixin */
+			@mixin --responsive-padding(
+				--large: 40px,
+				--medium: 30px,
+				--small: 15px
+			) {
+				@result {
+					padding: var(--small);
+
+					@media (width >=480px) {
+						padding: var(--medium);
+					}
+
+					@media (width >=1200px) {
+						padding: var(--large);
+					}
+				}
+			}
+
+			/* Responsive font mixin */
+			@mixin --responsive-font(
+				--large: 20px,
+				--medium: 18px,
+				--small: 14px
+			) {
+				@result {
+					font-size: var(--small);
+
+					@media (width >=480px) {
+						font-size: var(--medium);
+					}
+
+					@media (width >=1200px) {
+						font-size: var(--large);
+					}
+				}
+			}
+
+			/* Hover transition macro */
+			@macro --smooth-hover {
+				transition: all 0.3s ease;
+				cursor: pointer;
+			}
+
+			/* Scale on hover macro */
+			@macro --hover-scale {
+				transform: scale(1.05);
+			}
+
+			/* Motion-safe transition mixin */
+			@mixin --motion-safe-transition(--duration: 0.3s, --easing: ease) {
+				@result {
+					transition: all var(--duration) var(--easing);
+
+					@media (prefers-reduced-motion: reduce) {
+						transition: none;
+					}
+				}
+			}
+
+			/* =============================================
 		   Multiple @apply in Single Selectors
 		   ============================================= */
 
-		/* 1. Composing a card with multiple mixins/macros */
-		.theme-card {
-			@apply --card-spacing;
-			@apply --gradient-bg(#caf0f8, white);
-			@apply --rounded;
-			@apply --shadow-depth;
-			@apply --centered-text;
-			font-weight: bold;
-			color: #333;
-		}
-
-		/* 2. Composing typography with spacing */
-		.size-text {
-			@apply --heading-style(24px, 600, #333);
-			@apply --responsive-padding(30px, 20px, 10px);
-			background: #f0f8ff;
-			border-radius: 10px;
-			text-align: center;
-		}
-
-		/* 3. Accent card with multiple layers */
-		.theme-text {
-			@apply --border-accent(2px, solid, #1e40af);
-			@apply --card-spacing;
-			@apply --gradient-bg(#dbeafe, #f7fafc);
-			@apply --heading-style(18px, 600, #1e40af);
-			text-align: center;
-		}
-
-		/* 4. Border + shadow + spacing composition */
-		.border-demo {
-			@apply --border-accent(3px, solid, #0ea5e9);
-			@apply --card-spacing;
-			@apply --shadow-depth;
-			background: white;
-			text-align: center;
-		}
-
-		/* 5. Responsive card with multiple mixins */
-		.responsive-demo {
-			@apply --responsive-padding;
-			@apply --responsive-font;
-			@apply --gradient-bg(#e0f2fe, #f8fafc);
-			border-radius: 10px;
-			text-align: center;
-			margin: 20px 0;
-		}
-
-		/* 6. Hover-ready interactive card */
-		.feature-demo {
-			@apply --card-spacing;
-			@apply --shadow-depth;
-			@apply --smooth-hover;
-			@apply --motion-safe-transition;
-			display: grid;
-			gap: 20px;
-			background: #dbeafe;
-			border-radius: 10px;
-			text-align: center;
-		}
-
-		.feature-demo:hover {
-			@apply --hover-scale;
-		}
-
-		/* 7. Animation-safe interactive element */
-		.animation-demo {
-			@apply --card-spacing;
-			@apply --rounded;
-			@apply --smooth-hover;
-			@apply --motion-safe-transition(0.3s, ease);
-			background: #3b82f6;
-			color: white;
-			text-align: center;
-		}
-
-		.animation-demo:hover {
-			@apply --hover-scale;
-		}
-	</style>
-</head>
-
-<body>
-	<div class="container">
-		<h1>CSS Mixin/Macro Polyfill - Multiple @apply</h1>
-		<p style="text-align: center; font-size: 18px; color: #666">
-			Demonstrating multiple @apply rules composed within a single selector
-		</p>
-
-		<div class="demo-section">
-			<h2>1. Composed Card (5 @apply rules)</h2>
-			<div class="code-block">.theme-card {
+			/* 1. Composing a card with multiple mixins/macros */
+			.theme-card {
 				@apply --card-spacing;
 				@apply --gradient-bg(#caf0f8, white);
 				@apply --rounded;
 				@apply --shadow-depth;
 				@apply --centered-text;
-				}</div>
-			<div class="example-result theme-card">
-				This card composes spacing, gradient, rounding, shadow, and centering!
-			</div>
-		</div>
+				font-weight: bold;
+				color: #333;
+			}
 
-		<div class="demo-section">
-			<h2>2. Typography + Spacing Composition</h2>
-			<div class="code-block">.size-text {
+			/* 2. Composing typography with spacing */
+			.size-text {
 				@apply --heading-style(24px, 600, #333);
 				@apply --responsive-padding(30px, 20px, 10px);
-				}</div>
-			<div class="example-result size-text">
-				Heading style mixin + responsive padding mixin combined!
-			</div>
-		</div>
+				background: #f0f8ff;
+				border-radius: 10px;
+				text-align: center;
+			}
 
-		<div class="demo-section">
-			<h2>3. Accent Card (border + gradient + typography)</h2>
-			<div class="code-block">.theme-text {
+			/* 3. Accent card with multiple layers */
+			.theme-text {
 				@apply --border-accent(2px, solid, #1e40af);
 				@apply --card-spacing;
 				@apply --gradient-bg(#dbeafe, #f7fafc);
 				@apply --heading-style(18px, 600, #1e40af);
-				}</div>
-			<div class="example-result theme-text">
-				Multiple @mixin rules create a layered accent card!
-			</div>
-		</div>
+				text-align: center;
+			}
 
-		<div class="demo-section">
-			<h2>4. Border + Shadow Composition</h2>
-			<div class="code-block">.border-demo {
+			/* 4. Border + shadow + spacing composition */
+			.border-demo {
 				@apply --border-accent(3px, solid, #0ea5e9);
 				@apply --card-spacing;
 				@apply --shadow-depth;
-				}</div>
-			<div class="example-result border-demo">
-				Border mixin and shadow macro combined for depth!
-			</div>
-		</div>
+				background: white;
+				text-align: center;
+			}
 
-		<div class="demo-section">
-			<h2>5. Responsive Layout (padding + font + gradient)</h2>
-			<div class="code-block">.responsive-demo {
+			/* 5. Responsive card with multiple mixins */
+			.responsive-demo {
 				@apply --responsive-padding;
 				@apply --responsive-font;
 				@apply --gradient-bg(#e0f2fe, #f8fafc);
-				}</div>
-			<div class="example-result responsive-demo">
-				Resize the window to see responsive padding and font size in action!
-			</div>
-		</div>
+				border-radius: 10px;
+				text-align: center;
+				margin: 20px 0;
+			}
 
-		<div class="demo-section">
-			<h2>6. Interactive Card (shadow + hover + motion-safe)</h2>
-			<div class="code-block">.feature-demo {
+			/* 6. Hover-ready interactive card */
+			.feature-demo {
 				@apply --card-spacing;
 				@apply --shadow-depth;
 				@apply --smooth-hover;
 				@apply --motion-safe-transition;
-				}
-				.feature-demo:hover {
-				@apply --hover-scale;
-				}</div>
-			<div class="example-result feature-demo">
-				Hover me! Composed from shadow, hover, and motion-safe macros/mixins.
-			</div>
-		</div>
+				display: grid;
+				gap: 20px;
+				background: #dbeafe;
+				border-radius: 10px;
+				text-align: center;
+			}
 
-		<div class="demo-section">
-			<h2>7. Animation-Safe Interactive Element</h2>
-			<div class="code-block">.animation-demo {
+			.feature-demo:hover {
+				@apply --hover-scale;
+			}
+
+			/* 7. Animation-safe interactive element */
+			.animation-demo {
 				@apply --card-spacing;
 				@apply --rounded;
 				@apply --smooth-hover;
 				@apply --motion-safe-transition(0.3s, ease);
-				}
-				.animation-demo:hover { @apply --hover-scale; }</div>
-			<div class="example-result animation-demo">
-				Hover me! This respects your motion preferences via composed @apply rules.
+				background: #3b82f6;
+				color: white;
+				text-align: center;
+			}
+
+			.animation-demo:hover {
+				@apply --hover-scale;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="container">
+			<h1>CSS Mixin/Macro Polyfill - Multiple @apply</h1>
+			<p style="text-align: center; font-size: 18px; color: #666">
+				Demonstrating multiple @apply rules composed within a single
+				selector
+			</p>
+
+			<div class="demo-section">
+				<h2>1. Composed Card (5 @apply rules)</h2>
+				<div class="code-block">
+					.theme-card { @apply --card-spacing; @apply
+					--gradient-bg(#caf0f8, white); @apply --rounded; @apply
+					--shadow-depth; @apply --centered-text; }
+				</div>
+				<div class="example-result theme-card">
+					This card composes spacing, gradient, rounding, shadow, and
+					centering!
+				</div>
+			</div>
+
+			<div class="demo-section">
+				<h2>2. Typography + Spacing Composition</h2>
+				<div class="code-block">
+					.size-text { @apply --heading-style(24px, 600, #333); @apply
+					--responsive-padding(30px, 20px, 10px); }
+				</div>
+				<div class="example-result size-text">
+					Heading style mixin + responsive padding mixin combined!
+				</div>
+			</div>
+
+			<div class="demo-section">
+				<h2>3. Accent Card (border + gradient + typography)</h2>
+				<div class="code-block">
+					.theme-text { @apply --border-accent(2px, solid, #1e40af);
+					@apply --card-spacing; @apply --gradient-bg(#dbeafe,
+					#f7fafc); @apply --heading-style(18px, 600, #1e40af); }
+				</div>
+				<div class="example-result theme-text">
+					Multiple @mixin rules create a layered accent card!
+				</div>
+			</div>
+
+			<div class="demo-section">
+				<h2>4. Border + Shadow Composition</h2>
+				<div class="code-block">
+					.border-demo { @apply --border-accent(3px, solid, #0ea5e9);
+					@apply --card-spacing; @apply --shadow-depth; }
+				</div>
+				<div class="example-result border-demo">
+					Border mixin and shadow macro combined for depth!
+				</div>
+			</div>
+
+			<div class="demo-section">
+				<h2>5. Responsive Layout (padding + font + gradient)</h2>
+				<div class="code-block">
+					.responsive-demo { @apply --responsive-padding; @apply
+					--responsive-font; @apply --gradient-bg(#e0f2fe, #f8fafc); }
+				</div>
+				<div class="example-result responsive-demo">
+					Resize the window to see responsive padding and font size in
+					action!
+				</div>
+			</div>
+
+			<div class="demo-section">
+				<h2>6. Interactive Card (shadow + hover + motion-safe)</h2>
+				<div class="code-block">
+					.feature-demo { @apply --card-spacing; @apply
+					--shadow-depth; @apply --smooth-hover; @apply
+					--motion-safe-transition; } .feature-demo:hover { @apply
+					--hover-scale; }
+				</div>
+				<div class="example-result feature-demo">
+					Hover me! Composed from shadow, hover, and motion-safe
+					macros/mixins.
+				</div>
+			</div>
+
+			<div class="demo-section">
+				<h2>7. Animation-Safe Interactive Element</h2>
+				<div class="code-block">
+					.animation-demo { @apply --card-spacing; @apply --rounded;
+					@apply --smooth-hover; @apply --motion-safe-transition(0.3s,
+					ease); } .animation-demo:hover { @apply --hover-scale; }
+				</div>
+				<div class="example-result animation-demo">
+					Hover me! This respects your motion preferences via composed
+					@apply rules.
+				</div>
 			</div>
 		</div>
-	</div>
 
-	<script type="module">
-		import {
-			init,
-		} from "../packages/css-mixin-polyfill/dist/index.umd.js";
+		<script type="module">
+			import { init } from "../packages/css-mixin-polyfill/dist/index.umd.js";
 
-		// Initialize the polyfill
-		init();
+			// Initialize the polyfill
+			init();
 
-		console.log("Multiple @apply CSS Mixin/Macro Polyfill loaded!");
-	</script>
-</body>
-
+			console.log("Multiple @apply CSS Mixin/Macro Polyfill loaded!");
+		</script>
+	</body>
 </html>

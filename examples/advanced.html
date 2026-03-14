@@ -1,403 +1,428 @@
 <!doctype html>
 <html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>CSS Mixin/Macro Polyfill - Advanced Examples</title>
+		<!-- Favicon for older Browsers -->
+		<link rel="icon" type="image/x-icon" href="../favicon.ico" />
+		<!-- SVG-Favicon for modern browsers -->
+		<link rel="icon" type="image/svg+xml" href="../favicon.svg" />
 
-<head>
-	<meta charset="UTF-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>CSS Mixin/Macro Polyfill - Advanced Examples</title>
-	<!-- Favicon for older Browsers -->
-	<link rel="icon" type="image/x-icon" href="../favicon.ico" />
-	<!-- SVG-Favicon for modern browsers -->
-	<link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+		<!-- PNG-Favicons for High-DPI (Retina) Displays -->
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="32x32"
+			href="../favicon-32x32.png"
+		/>
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="16x16"
+			href="../favicon-16x16.png"
+		/>
+		<style>
+			body {
+				font-family:
+					system-ui,
+					-apple-system,
+					sans-serif;
+				margin: 0;
+				padding: 20px;
+				background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+				min-height: 100vh;
+			}
 
-	<!-- PNG-Favicons for High-DPI (Retina) Displays -->
-	<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
-	<link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
-	<style>
-		body {
-			font-family:
-				system-ui,
-				-apple-system,
-				sans-serif;
-			margin: 0;
-			padding: 20px;
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-			min-height: 100vh;
-		}
+			.container {
+				max-width: 1000px;
+				margin: 0 auto;
+				background: rgba(255, 255, 255, 0.95);
+				padding: 40px;
+				border-radius: 20px;
+				box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+			}
 
-		.container {
-			max-width: 1000px;
-			margin: 0 auto;
-			background: rgba(255, 255, 255, 0.95);
-			padding: 40px;
-			border-radius: 20px;
-			box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-		}
+			h1 {
+				text-align: center;
+				color: #333;
+				margin-bottom: 40px;
+				font-size: 2.5em;
+			}
 
-		h1 {
-			text-align: center;
-			color: #333;
-			margin-bottom: 40px;
-			font-size: 2.5em;
-		}
+			.demo-section {
+				margin-bottom: 50px;
+				padding: 30px;
+				background: #f8f9fa;
+				border-radius: 15px;
+				border-left: 5px solid #007acc;
+			}
 
-		.demo-section {
-			margin-bottom: 50px;
-			padding: 30px;
-			background: #f8f9fa;
-			border-radius: 15px;
-			border-left: 5px solid #007acc;
-		}
+			.demo-section h2 {
+				color: #007acc;
+				margin-top: 0;
+			}
 
-		.demo-section h2 {
-			color: #007acc;
-			margin-top: 0;
-		}
+			.code-block {
+				background: #2d3748;
+				color: #e2e8f0;
+				padding: 20px;
+				border-radius: 10px;
+				font-family: "Courier New", monospace;
+				margin: 15px 0;
+				overflow-x: auto;
+				white-space: pre-wrap;
+			}
 
-		.code-block {
-			background: #2d3748;
-			color: #e2e8f0;
-			padding: 20px;
-			border-radius: 10px;
-			font-family: "Courier New", monospace;
-			margin: 15px 0;
-			overflow-x: auto;
-			white-space: pre-wrap;
-		}
-
-		/* =============================================
+			/* =============================================
 		   Advanced Mixin and Macro Definitions
 		   ============================================= */
 
-		/* 1. Responsive grid with @contents for custom column definitions */
-		@macro --responsive-grid {
-			display: grid;
-			gap: 30px;
-			@contents;
-		}
-
-		/* 2. Animated card with progressive enhancement */
-		@mixin --animated-card(--shadow-base: 0 10px 30px rgba(0, 0, 0, 0.1), --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.2)) {
-			@result {
-				background: white;
-				padding: 30px;
-				border-radius: 15px;
-				box-shadow: var(--shadow-base);
-				transform: translateY(0);
-				transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-				@media (prefers-reduced-motion: reduce) {
-					transition: none;
-				}
-			}
-		}
-
-		/* 3. Gradient text effect mixin (from the spec) */
-		@mixin --gradient-text(--from <color>: #667eea, --to <color>: #764ba2, --angle: 45deg) {
-			--gradient: linear-gradient(var(--angle), var(--from), var(--to));
-
-			@result {
-				background: var(--gradient);
-				color: transparent;
-				-webkit-background-clip: text;
-				background-clip: text;
-				font-weight: bold;
-			}
-		}
-
-		/* 4. Accessible button mixin */
-		@mixin --accessible-button(--bg <color>: #007acc, --bg-hover <color>: #0056b3) {
-			@result {
-				background: var(--bg);
-				color: white;
-				border: none;
-				padding: 15px 30px;
-				border-radius: 25px;
-				font-size: 16px;
-				font-weight: 600;
-				cursor: pointer;
-				transition: all 0.2s ease;
-
-				@media (prefers-reduced-motion: reduce) {
-					transition: none;
-				}
-			}
-		}
-
-		/* 5. Dark mode card mixin */
-		@mixin --dark-mode-card(--light-bg: #ffffff, --dark-bg: #2d3748, --light-text: #2d3748, --dark-text: #e2e8f0) {
-			@result {
-				background: var(--light-bg);
-				color: var(--light-text);
-				border: 1px solid #e2e8f0;
-				padding: 30px;
-				border-radius: 15px;
-				box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-
-				@media (prefers-color-scheme: dark) {
-					background: var(--dark-bg);
-					color: var(--dark-text);
-					border-color: #4a5568;
-					box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-				}
-			}
-		}
-
-		/* 6. Performance-optimized macro */
-		@macro --gpu-optimized {
-			will-change: transform;
-			backface-visibility: hidden;
-			perspective: 1000px;
-		}
-
-		/* 7. Advanced typography mixin */
-		@mixin --advanced-typography(--weight: 400, --smoothing: antialiased) {
-			@result {
-				font-variation-settings: "wght" var(--weight);
-				text-rendering: optimizeLegibility;
-				-webkit-font-smoothing: var(--smoothing);
-			}
-		}
-
-		/* 8. Responsive container macro with @contents */
-		@macro --responsive-container {
-			max-width: 1200px;
-			margin: 0 auto;
-			padding: 20px;
-			@contents;
-		}
-
-		/* 9. Logical properties macro */
-		@macro --logical-spacing {
-			margin-inline: 20px;
-			padding-block: 15px;
-			border-inline: 2px solid #007acc;
-		}
-
-		/* =============================================
-		   Applying Advanced Mixins and Macros
-		   ============================================= */
-
-		.responsive-grid {
-			@apply --responsive-grid {
-				grid-template-columns: repeat(3, 1fr);
-
-				@media (width < 768px) {
-					grid-template-columns: 1fr;
-				}
-			}
-		}
-
-		.grid-item {
-			padding: 25px;
-			background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-			color: white;
-			border-radius: 15px;
-			text-align: center;
-			font-weight: bold;
-		}
-
-		.animated-card {
-			@apply --animated-card;
-		}
-
-		.animated-card:hover {
-			transform: translateY(-10px) scale(1.02);
-			box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-		}
-
-		.modern-text {
-			@apply --gradient-text;
-			font-size: clamp(1rem, 5vw, 2rem);
-		}
-
-		.modern-text-alt {
-			@apply --gradient-text(#ff6b6b, #ee5a24, 135deg);
-			font-size: 1.5rem;
-		}
-
-		.accessible-button {
-			@apply --accessible-button;
-		}
-
-		.accessible-button:hover {
-			background: #0056b3;
-			transform: scale(1.05);
-		}
-
-		.accessible-button:focus {
-			outline: 2px solid #007acc;
-			outline-offset: 2px;
-		}
-
-		.accessible-button-alt {
-			@apply --accessible-button(#4caf50, #388e3c);
-		}
-
-		.accessible-button-alt:hover {
-			background: #388e3c;
-		}
-
-		.theme-card {
-			@apply --dark-mode-card;
-		}
-
-		.performance-optimized {
-			@apply --gpu-optimized;
-			padding: 20px;
-			background: #f8f9fa;
-			border-radius: 8px;
-		}
-
-		.advanced-typography {
-			@apply --advanced-typography;
-			padding: 20px;
-		}
-
-		.advanced-typography-bold {
-			@apply --advanced-typography(700, antialiased);
-			padding: 20px;
-			font-size: 1.2em;
-		}
-
-		.content-container {
-			@apply --responsive-container {
-				background: #f0f8ff;
-				border-radius: 12px;
-			}
-		}
-
-		.logical-properties {
-			@apply --logical-spacing;
-			background: #f8f9fa;
-			border-radius: 8px;
-		}
-	</style>
-</head>
-
-<body>
-	<div class="container">
-		<h1>CSS Mixin/Macro Polyfill - Advanced Examples</h1>
-
-		<div class="demo-section">
-			<h2>1. Responsive Grid with @contents</h2>
-			<p>
-				Using <code>@macro</code> with <code>@contents</code> to inject
-				custom grid column definitions:
-			</p>
-			<div class="code-block">@macro --responsive-grid {
+			/* 1. Responsive grid with @contents for custom column definitions */
+			@macro --responsive-grid {
 				display: grid;
 				gap: 30px;
 				@contents;
-				}
+			}
 
-				.responsive-grid {
+			/* 2. Animated card with progressive enhancement */
+			@mixin --animated-card(
+				--shadow-base: 0 10px 30px rgba(0, 0, 0, 0.1),
+				--shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.2)
+			) {
+				@result {
+					background: white;
+					padding: 30px;
+					border-radius: 15px;
+					box-shadow: var(--shadow-base);
+					transform: translateY(0);
+					transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+					@media (prefers-reduced-motion: reduce) {
+						transition: none;
+					}
+				}
+			}
+
+			/* 3. Gradient text effect mixin (from the spec) */
+			@mixin --gradient-text(
+				--from <color>: #667eea,
+				--to <color>: #764ba2,
+				--angle: 45deg
+			) {
+				--gradient: linear-gradient(
+					var(--angle),
+					var(--from),
+					var(--to)
+				);
+
+				@result {
+					background: var(--gradient);
+					color: transparent;
+					-webkit-background-clip: text;
+					background-clip: text;
+					font-weight: bold;
+				}
+			}
+
+			/* 4. Accessible button mixin */
+			@mixin --accessible-button(
+				--bg <color>: #007acc,
+				--bg-hover <color>: #0056b3
+			) {
+				@result {
+					background: var(--bg);
+					color: white;
+					border: none;
+					padding: 15px 30px;
+					border-radius: 25px;
+					font-size: 16px;
+					font-weight: 600;
+					cursor: pointer;
+					transition: all 0.2s ease;
+
+					@media (prefers-reduced-motion: reduce) {
+						transition: none;
+					}
+				}
+			}
+
+			/* 5. Dark mode card mixin */
+			@mixin --dark-mode-card(
+				--light-bg: #ffffff,
+				--dark-bg: #2d3748,
+				--light-text: #2d3748,
+				--dark-text: #e2e8f0
+			) {
+				@result {
+					background: var(--light-bg);
+					color: var(--light-text);
+					border: 1px solid #e2e8f0;
+					padding: 30px;
+					border-radius: 15px;
+					box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+
+					@media (prefers-color-scheme: dark) {
+						background: var(--dark-bg);
+						color: var(--dark-text);
+						border-color: #4a5568;
+						box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+					}
+				}
+			}
+
+			/* 6. Performance-optimized macro */
+			@macro --gpu-optimized {
+				will-change: transform;
+				backface-visibility: hidden;
+				perspective: 1000px;
+			}
+
+			/* 7. Advanced typography mixin */
+			@mixin --advanced-typography(
+				--weight: 400,
+				--smoothing: antialiased
+			) {
+				@result {
+					font-variation-settings: "wght" var(--weight);
+					text-rendering: optimizeLegibility;
+					-webkit-font-smoothing: var(--smoothing);
+				}
+			}
+
+			/* 8. Responsive container macro with @contents */
+			@macro --responsive-container {
+				max-width: 1200px;
+				margin: 0 auto;
+				padding: 20px;
+				@contents;
+			}
+
+			/* 9. Logical properties macro */
+			@macro --logical-spacing {
+				margin-inline: 20px;
+				padding-block: 15px;
+				border-inline: 2px solid #007acc;
+			}
+
+			/* =============================================
+		   Applying Advanced Mixins and Macros
+		   ============================================= */
+
+			.responsive-grid {
 				@apply --responsive-grid {
-				grid-template-columns: repeat(3, 1fr);
-				@media (width < 768px) { grid-template-columns: 1fr; } } }</div>
-					<div class="responsive-grid">
-						<div class="grid-item">Item 1</div>
-						<div class="grid-item">Item 2</div>
-						<div class="grid-item">Item 3</div>
-						<div class="grid-item">Item 4</div>
-						<div class="grid-item">Item 5</div>
-						<div class="grid-item">Item 6</div>
-					</div>
+					grid-template-columns: repeat(3, 1fr);
+
+					@media (width < 768px) {
+						grid-template-columns: 1fr;
+					}
+				}
+			}
+
+			.grid-item {
+				padding: 25px;
+				background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+				color: white;
+				border-radius: 15px;
+				text-align: center;
+				font-weight: bold;
+			}
+
+			.animated-card {
+				@apply --animated-card;
+			}
+
+			.animated-card:hover {
+				transform: translateY(-10px) scale(1.02);
+				box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+			}
+
+			.modern-text {
+				@apply --gradient-text;
+				font-size: clamp(1rem, 5vw, 2rem);
+			}
+
+			.modern-text-alt {
+				@apply --gradient-text(#ff6b6b, #ee5a24, 135deg);
+				font-size: 1.5rem;
+			}
+
+			.accessible-button {
+				@apply --accessible-button;
+			}
+
+			.accessible-button:hover {
+				background: #0056b3;
+				transform: scale(1.05);
+			}
+
+			.accessible-button:focus {
+				outline: 2px solid #007acc;
+				outline-offset: 2px;
+			}
+
+			.accessible-button-alt {
+				@apply --accessible-button(#4caf50, #388e3c);
+			}
+
+			.accessible-button-alt:hover {
+				background: #388e3c;
+			}
+
+			.theme-card {
+				@apply --dark-mode-card;
+			}
+
+			.performance-optimized {
+				@apply --gpu-optimized;
+				padding: 20px;
+				background: #f8f9fa;
+				border-radius: 8px;
+			}
+
+			.advanced-typography {
+				@apply --advanced-typography;
+				padding: 20px;
+			}
+
+			.advanced-typography-bold {
+				@apply --advanced-typography(700, antialiased);
+				padding: 20px;
+				font-size: 1.2em;
+			}
+
+			.content-container {
+				@apply --responsive-container {
+					background: #f0f8ff;
+					border-radius: 12px;
+				}
+			}
+
+			.logical-properties {
+				@apply --logical-spacing;
+				background: #f8f9fa;
+				border-radius: 8px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="container">
+			<h1>CSS Mixin/Macro Polyfill - Advanced Examples</h1>
+
+			<div class="demo-section">
+				<h2>1. Responsive Grid with @contents</h2>
+				<p>
+					Using <code>@macro</code> with <code>@contents</code> to
+					inject custom grid column definitions:
+				</p>
+				<div class="code-block">
+					@macro --responsive-grid { display: grid; gap: 30px;
+					@contents; } .responsive-grid { @apply --responsive-grid {
+					grid-template-columns: repeat(3, 1fr); @media (width <
+					768px) { grid-template-columns: 1fr; } } }
+				</div>
+				<div class="responsive-grid">
+					<div class="grid-item">Item 1</div>
+					<div class="grid-item">Item 2</div>
+					<div class="grid-item">Item 3</div>
+					<div class="grid-item">Item 4</div>
+					<div class="grid-item">Item 5</div>
+					<div class="grid-item">Item 6</div>
+				</div>
 			</div>
 
 			<div class="demo-section">
 				<h2>2. Progressive Enhancement for Animations</h2>
 				<p>Cards with hover effects that respect motion preferences:</p>
-				<div class="code-block">@mixin --animated-card(--shadow-base: ..., --shadow-hover: ...) {
-					@result {
-					box-shadow: var(--shadow-base);
-					transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-					@media (prefers-reduced-motion: reduce) {
-					transition: none;
-					}
-					}
-					}
-
-					.animated-card { @apply --animated-card; }</div>
+				<div class="code-block">
+					@mixin --animated-card(--shadow-base: ..., --shadow-hover:
+					...) { @result { box-shadow: var(--shadow-base); transition:
+					all 0.3s cubic-bezier(0.4, 0, 0.2, 1); @media
+					(prefers-reduced-motion: reduce) { transition: none; } } }
+					.animated-card { @apply --animated-card; }
+				</div>
 				<div class="animated-card">
 					<h3>Hover over me!</h3>
 					<p>
-						This card uses CSS transforms and transitions,
-						with <code>@media (prefers-reduced-motion)</code> inside the mixin.
+						This card uses CSS transforms and transitions, with
+						<code>@media (prefers-reduced-motion)</code> inside the
+						mixin.
 					</p>
 				</div>
 			</div>
 
 			<div class="demo-section">
 				<h2>3. Gradient Text Effect (from the spec)</h2>
-				<div class="code-block">@mixin --gradient-text(--from &lt;color&gt;: #667eea, --to &lt;color&gt;:
-					#764ba2, --angle: 45deg) {
-					--gradient: linear-gradient(var(--angle), var(--from), var(--to));
-					@result {
-					background: var(--gradient);
-					color: transparent;
-					background-clip: text;
-					}
-					}
-
-					.modern-text { @apply --gradient-text; }
-					.modern-text-alt { @apply --gradient-text(#ff6b6b, #ee5a24, 135deg); }</div>
-				<div style="padding: 20px;">
+				<div class="code-block">
+					@mixin --gradient-text(--from &lt;color&gt;: #667eea, --to
+					&lt;color&gt;: #764ba2, --angle: 45deg) { --gradient:
+					linear-gradient(var(--angle), var(--from), var(--to));
+					@result { background: var(--gradient); color: transparent;
+					background-clip: text; } } .modern-text { @apply
+					--gradient-text; } .modern-text-alt { @apply
+					--gradient-text(#ff6b6b, #ee5a24, 135deg); }
+				</div>
+				<div style="padding: 20px">
 					<div class="modern-text">Default Gradient Typography</div>
-					<div class="modern-text-alt">Custom Gradient Typography</div>
+					<div class="modern-text-alt">
+						Custom Gradient Typography
+					</div>
 				</div>
 			</div>
 
 			<div class="demo-section">
 				<h2>4. Accessible Buttons</h2>
 				<p>Buttons that respect user preferences for reduced motion:</p>
-				<div class="code-block">@mixin --accessible-button(--bg &lt;color&gt;: #007acc, --bg-hover
-					&lt;color&gt;: #0056b3) {
-					@result {
-					background: var(--bg);
-					transition: all 0.2s ease;
-					@media (prefers-reduced-motion: reduce) { transition: none; }
-					}
-					}
-
+				<div class="code-block">
+					@mixin --accessible-button(--bg &lt;color&gt;: #007acc,
+					--bg-hover &lt;color&gt;: #0056b3) { @result { background:
+					var(--bg); transition: all 0.2s ease; @media
+					(prefers-reduced-motion: reduce) { transition: none; } } }
 					.accessible-button { @apply --accessible-button; }
-					.accessible-button-alt { @apply --accessible-button(#4caf50, #388e3c); }</div>
-				<div style="display: flex; gap: 15px; padding: 20px; flex-wrap: wrap;">
+					.accessible-button-alt { @apply --accessible-button(#4caf50,
+					#388e3c); }
+				</div>
+				<div
+					style="
+						display: flex;
+						gap: 15px;
+						padding: 20px;
+						flex-wrap: wrap;
+					"
+				>
 					<button class="accessible-button">Primary Button</button>
-					<button class="accessible-button-alt">Success Button</button>
+					<button class="accessible-button-alt">
+						Success Button
+					</button>
 				</div>
 			</div>
 
 			<div class="demo-section">
 				<h2>5. Dark Mode Support</h2>
-				<div class="code-block">@mixin --dark-mode-card(--light-bg: #ffffff, --dark-bg: #2d3748) {
-					@result {
-					background: var(--light-bg);
-					@media (prefers-color-scheme: dark) {
-					background: var(--dark-bg);
-					}
-					}
-					}
-
-					.theme-card { @apply --dark-mode-card; }</div>
+				<div class="code-block">
+					@mixin --dark-mode-card(--light-bg: #ffffff, --dark-bg:
+					#2d3748) { @result { background: var(--light-bg); @media
+					(prefers-color-scheme: dark) { background: var(--dark-bg); }
+					} } .theme-card { @apply --dark-mode-card; }
+				</div>
 				<div class="theme-card">
 					<h3>Theme-Aware Card</h3>
 					<p>
 						This card automatically adapts to your system's dark
-						mode preference using <code>@media</code> inside <code>@result</code>.
+						mode preference using <code>@media</code> inside
+						<code>@result</code>.
 					</p>
 				</div>
 			</div>
 
 			<div class="demo-section">
 				<h2>6. GPU-Optimized Performance (@macro)</h2>
-				<div class="code-block">@macro --gpu-optimized {
-					will-change: transform;
-					backface-visibility: hidden;
-					perspective: 1000px;
-					}
-
-					.performance-optimized { @apply --gpu-optimized; }</div>
+				<div class="code-block">
+					@macro --gpu-optimized { will-change: transform;
+					backface-visibility: hidden; perspective: 1000px; }
+					.performance-optimized { @apply --gpu-optimized; }
+				</div>
 				<div class="performance-optimized">
 					<p>
 						This element uses performance-optimized CSS properties
@@ -408,16 +433,15 @@
 
 			<div class="demo-section">
 				<h2>7. Advanced Typography (@mixin with font variation)</h2>
-				<div class="code-block">@mixin --advanced-typography(--weight: 400, --smoothing: antialiased) {
-					@result {
-					font-variation-settings: "wght" var(--weight);
-					text-rendering: optimizeLegibility;
-					-webkit-font-smoothing: var(--smoothing);
-					}
-					}
-
+				<div class="code-block">
+					@mixin --advanced-typography(--weight: 400, --smoothing:
+					antialiased) { @result { font-variation-settings: "wght"
+					var(--weight); text-rendering: optimizeLegibility;
+					-webkit-font-smoothing: var(--smoothing); } }
 					.advanced-typography { @apply --advanced-typography; }
-					.advanced-typography-bold { @apply --advanced-typography(700, antialiased); }</div>
+					.advanced-typography-bold { @apply
+					--advanced-typography(700, antialiased); }
+				</div>
 				<div class="advanced-typography">
 					<p>Regular weight typography with optimized rendering.</p>
 				</div>
@@ -428,19 +452,12 @@
 
 			<div class="demo-section">
 				<h2>8. Responsive Container with @contents</h2>
-				<div class="code-block">@macro --responsive-container {
-					max-width: 1200px;
-					margin: 0 auto;
-					padding: 20px;
-					@contents;
-					}
-
-					.content-container {
-					@apply --responsive-container {
-					background: #f0f8ff;
-					border-radius: 12px;
-					}
-					}</div>
+				<div class="code-block">
+					@macro --responsive-container { max-width: 1200px; margin: 0
+					auto; padding: 20px; @contents; } .content-container {
+					@apply --responsive-container { background: #f0f8ff;
+					border-radius: 12px; } }
+				</div>
 				<div class="content-container">
 					<p>
 						This container uses <code>@contents</code> to inject
@@ -452,17 +469,15 @@
 
 			<div class="demo-section">
 				<h2>9. Logical Properties (@macro)</h2>
-				<div class="code-block">@macro --logical-spacing {
-					margin-inline: 20px;
-					padding-block: 15px;
-					border-inline: 2px solid #007acc;
-					}
-
-					.logical-properties { @apply --logical-spacing; }</div>
+				<div class="code-block">
+					@macro --logical-spacing { margin-inline: 20px;
+					padding-block: 15px; border-inline: 2px solid #007acc; }
+					.logical-properties { @apply --logical-spacing; }
+				</div>
 				<div class="logical-properties">
 					<p>
-						This element uses logical properties via @macro,
-						working correctly with different writing modes and directions.
+						This element uses logical properties via @macro, working
+						correctly with different writing modes and directions.
 					</p>
 				</div>
 			</div>
@@ -476,6 +491,5 @@
 
 			console.log("Advanced CSS Mixin/Macro Polyfill loaded!");
 		</script>
-</body>
-
+	</body>
 </html>

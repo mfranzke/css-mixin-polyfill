@@ -1,425 +1,426 @@
 <!doctype html>
 <html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>CSS Mixin and Macro Polyfill - Basic Examples</title>
+		<!-- Favicon for older Browsers -->
+		<link rel="icon" type="image/x-icon" href="../favicon.ico" />
+		<!-- SVG-Favicon for modern browsers -->
+		<link rel="icon" type="image/svg+xml" href="../favicon.svg" />
 
-<head>
-	<meta charset="UTF-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>CSS Mixin and Macro Polyfill - Basic Examples</title>
-	<!-- Favicon for older Browsers -->
-	<link rel="icon" type="image/x-icon" href="../favicon.ico" />
-	<!-- SVG-Favicon for modern browsers -->
-	<link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+		<!-- PNG-Favicons for High-DPI (Retina) Displays -->
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="32x32"
+			href="../favicon-32x32.png"
+		/>
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="16x16"
+			href="../favicon-16x16.png"
+		/>
+		<style>
+			body {
+				font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+				margin: 0;
+				padding: 20px;
+				background-color: #f5f5f5;
+			}
 
-	<!-- PNG-Favicons for High-DPI (Retina) Displays -->
-	<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
-	<link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
-	<style>
-		body {
-			font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-			margin: 0;
-			padding: 20px;
-			background-color: #f5f5f5;
-		}
+			.container {
+				max-width: 1200px;
+				margin: 0 auto;
+				background: white;
+				padding: 30px;
+				border-radius: 10px;
+				box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+			}
 
-		.container {
-			max-width: 1200px;
-			margin: 0 auto;
-			background: white;
-			padding: 30px;
-			border-radius: 10px;
-			box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-		}
+			h1 {
+				color: #333;
+				text-align: center;
+				margin-bottom: 30px;
+			}
 
-		h1 {
-			color: #333;
-			text-align: center;
-			margin-bottom: 30px;
-		}
+			.example {
+				margin-bottom: 40px;
+				padding: 20px;
+				border: 1px solid #ddd;
+				border-radius: 8px;
+				background-color: #fafafa;
+			}
 
-		.example {
-			margin-bottom: 40px;
-			padding: 20px;
-			border: 1px solid #ddd;
-			border-radius: 8px;
-			background-color: #fafafa;
-		}
+			.example h3 {
+				color: #555;
+				margin-top: 0;
+			}
 
-		.example h3 {
-			color: #555;
-			margin-top: 0;
-		}
+			.example-code {
+				background-color: #2d3748;
+				color: #e2e8f0;
+				padding: 15px;
+				border-radius: 5px;
+				font-family: "Courier New", monospace;
+				margin: 10px 0;
+				overflow-x: auto;
+				white-space: pre-wrap;
+			}
 
-		.example-code {
-			background-color: #2d3748;
-			color: #e2e8f0;
-			padding: 15px;
-			border-radius: 5px;
-			font-family: "Courier New", monospace;
-			margin: 10px 0;
-			overflow-x: auto;
-			white-space: pre-wrap;
-		}
+			.example-result {
+				padding: 15px;
+				border: 2px solid #007acc;
+				border-radius: 5px;
+				background-color: white;
+			}
 
-		.example-result {
-			padding: 15px;
-			border: 2px solid #007acc;
-			border-radius: 5px;
-			background-color: white;
-		}
-
-		/* =============================================
+			/* =============================================
 		   Macro Definitions (no parameters)
 		   ============================================= */
 
-		@macro --card-base {
-			padding: 20px;
-			border-radius: 8px;
-			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-		}
-
-		@macro --reset-list {
-			margin: 0;
-			padding: 0;
-			list-style: none;
-		}
-
-		@macro --center-text {
-			text-align: center;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-		}
-
-		/* =============================================
-		   Mixin Definitions (with parameters)
-		   ============================================= */
-
-		@mixin --colored-box(--bg <color>: lightblue, --text <color>: black) {
-			@result {
-				background-color: var(--bg);
-				color: var(--text);
-				padding: 20px;
-				border-radius: 8px;
-			}
-		}
-
-		@mixin --responsive-text(--large-size: 24px, --small-size: 16px) {
-			@result {
-				font-size: var(--large-size);
-
-				@media (width < 768px) {
-					font-size: var(--small-size);
-				}
-			}
-		}
-
-		@mixin --grid-layout(--columns: repeat(3, 1fr), --gap: 20px) {
-			@result {
-				display: grid;
-				grid-template-columns: var(--columns);
-				gap: var(--gap);
-			}
-		}
-
-		@mixin --theme-card(--bg <color>: #fff, --fg <color>: #333, --border <color>: #ddd) {
-			@result {
-				background-color: var(--bg);
-				color: var(--fg);
-				border: 1px solid var(--border);
-				padding: 20px;
-				border-radius: 5px;
-			}
-		}
-
-		/* =============================================
-		   Applying Macros and Mixins
-		   ============================================= */
-
-		.simple-card {
-			@apply --card-base;
-			background-color: #e3f2fd;
-		}
-
-		.nav-list {
-			@apply --reset-list;
-		}
-
-		.nav-list li {
-			display: inline-block;
-			padding: 8px 16px;
-			background-color: #007acc;
-			color: white;
-			border-radius: 4px;
-			margin: 4px;
-		}
-
-		.centered-box {
-			@apply --center-text;
-			@apply --card-base;
-			background-color: #fff3e0;
-			min-height: 80px;
-			font-weight: bold;
-		}
-
-		.blue-box {
-			@apply --colored-box(#2196f3, white);
-		}
-
-		.green-box {
-			@apply --colored-box(#4caf50, white);
-		}
-
-		.coral-box {
-			@apply --colored-box(coral, white);
-		}
-
-		.responsive-heading {
-			@apply --responsive-text(28px, 18px);
-			font-weight: bold;
-			color: #333;
-		}
-
-		.grid-container {
-			@apply --grid-layout(repeat(3, 1fr), 15px);
-		}
-
-		.grid-container>div {
-			@apply --card-base;
-			background-color: #e8f5e9;
-			text-align: center;
-		}
-
-		.dark-card {
-			@apply --theme-card(#2d3748, #e2e8f0, #4a5568);
-		}
-
-		.light-card {
-			@apply --theme-card(#ffffff, #2d3748, #e2e8f0);
-		}
-
-		.status-indicator {
-			padding: 10px;
-			border-radius: 5px;
-			margin: 10px 0;
-			font-weight: bold;
-		}
-
-		.native-support {
-			background-color: #4caf50;
-			color: white;
-		}
-
-		.polyfill-active {
-			background-color: #ff9800;
-			color: white;
-		}
-
-		.controls {
-			margin: 20px 0;
-			text-align: center;
-		}
-
-		button {
-			padding: 10px 20px;
-			margin: 0 10px;
-			border: none;
-			border-radius: 5px;
-			background-color: #007acc;
-			color: white;
-			cursor: pointer;
-			font-size: 16px;
-		}
-
-		button:hover {
-			background-color: #005a9e;
-		}
-	</style>
-</head>
-
-<body>
-	<div class="container">
-		<h1>CSS Mixin and Macro Polyfill - Basic Examples</h1>
-
-		<div id="status" class="status-indicator"></div>
-
-		<div class="controls">
-			<button type="button" class="refreshPolyfill">
-				Refresh Polyfill
-			</button>
-			<button type="button" class="toggleDebug">Toggle Debug</button>
-		</div>
-
-		<div class="example">
-			<h3>1. Simple Macro — Reusable Card Base</h3>
-			<div class="example-code">@macro --card-base {
+			@macro --card-base {
 				padding: 20px;
 				border-radius: 8px;
 				box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-				}
+			}
 
-				.simple-card {
-				@apply --card-base;
-				background-color: #e3f2fd;
-				}</div>
-			<div class="example-result simple-card">
-				This card uses the <code>--card-base</code> macro for consistent styling!
-			</div>
-		</div>
-
-		<div class="example">
-			<h3>2. Macro — Reset List</h3>
-			<div class="example-code">@macro --reset-list {
+			@macro --reset-list {
 				margin: 0;
 				padding: 0;
 				list-style: none;
+			}
+
+			@macro --center-text {
+				text-align: center;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+
+			/* =============================================
+		   Mixin Definitions (with parameters)
+		   ============================================= */
+
+			@mixin --colored-box(
+				--bg <color>: lightblue,
+				--text <color>: black
+			) {
+				@result {
+					background-color: var(--bg);
+					color: var(--text);
+					padding: 20px;
+					border-radius: 8px;
 				}
+			}
 
-				.nav-list { @apply --reset-list; }</div>
-			<div class="example-result">
-				<ul class="nav-list">
-					<li>Home</li>
-					<li>About</li>
-					<li>Contact</li>
-					<li>Blog</li>
-				</ul>
-			</div>
-		</div>
+			@mixin --responsive-text(--large-size: 24px, --small-size: 16px) {
+				@result {
+					font-size: var(--large-size);
 
-		<div class="example">
-			<h3>3. Combining Multiple Macros</h3>
-			<div class="example-code">.centered-box {
+					@media (width < 768px) {
+						font-size: var(--small-size);
+					}
+				}
+			}
+
+			@mixin --grid-layout(--columns: repeat(3, 1fr), --gap: 20px) {
+				@result {
+					display: grid;
+					grid-template-columns: var(--columns);
+					gap: var(--gap);
+				}
+			}
+
+			@mixin --theme-card(
+				--bg <color>: #fff,
+				--fg <color>: #333,
+				--border <color>: #ddd
+			) {
+				@result {
+					background-color: var(--bg);
+					color: var(--fg);
+					border: 1px solid var(--border);
+					padding: 20px;
+					border-radius: 5px;
+				}
+			}
+
+			/* =============================================
+		   Applying Macros and Mixins
+		   ============================================= */
+
+			.simple-card {
+				@apply --card-base;
+				background-color: #e3f2fd;
+			}
+
+			.nav-list {
+				@apply --reset-list;
+			}
+
+			.nav-list li {
+				display: inline-block;
+				padding: 8px 16px;
+				background-color: #007acc;
+				color: white;
+				border-radius: 4px;
+				margin: 4px;
+			}
+
+			.centered-box {
 				@apply --center-text;
 				@apply --card-base;
 				background-color: #fff3e0;
-				}</div>
-			<div class="example-result centered-box">
-				This box combines two macros: centering and card base!
+				min-height: 80px;
+				font-weight: bold;
+			}
+
+			.blue-box {
+				@apply --colored-box(#2196f3, white);
+			}
+
+			.green-box {
+				@apply --colored-box(#4caf50, white);
+			}
+
+			.coral-box {
+				@apply --colored-box(coral, white);
+			}
+
+			.responsive-heading {
+				@apply --responsive-text(28px, 18px);
+				font-weight: bold;
+				color: #333;
+			}
+
+			.grid-container {
+				@apply --grid-layout(repeat(3, 1fr), 15px);
+			}
+
+			.grid-container > div {
+				@apply --card-base;
+				background-color: #e8f5e9;
+				text-align: center;
+			}
+
+			.dark-card {
+				@apply --theme-card(#2d3748, #e2e8f0, #4a5568);
+			}
+
+			.light-card {
+				@apply --theme-card(#ffffff, #2d3748, #e2e8f0);
+			}
+
+			.status-indicator {
+				padding: 10px;
+				border-radius: 5px;
+				margin: 10px 0;
+				font-weight: bold;
+			}
+
+			.native-support {
+				background-color: #4caf50;
+				color: white;
+			}
+
+			.polyfill-active {
+				background-color: #ff9800;
+				color: white;
+			}
+
+			.controls {
+				margin: 20px 0;
+				text-align: center;
+			}
+
+			button {
+				padding: 10px 20px;
+				margin: 0 10px;
+				border: none;
+				border-radius: 5px;
+				background-color: #007acc;
+				color: white;
+				cursor: pointer;
+				font-size: 16px;
+			}
+
+			button:hover {
+				background-color: #005a9e;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="container">
+			<h1>CSS Mixin and Macro Polyfill - Basic Examples</h1>
+
+			<div id="status" class="status-indicator"></div>
+
+			<div class="controls">
+				<button type="button" class="refreshPolyfill">
+					Refresh Polyfill
+				</button>
+				<button type="button" class="toggleDebug">Toggle Debug</button>
 			</div>
-		</div>
 
-		<div class="example">
-			<h3>4. Parameterized Mixin — Colored Box</h3>
-			<div class="example-code">@mixin --colored-box(--bg &lt;color&gt;: lightblue, --text &lt;color&gt;: black) {
-				@result {
-				background-color: var(--bg);
-				color: var(--text);
-				padding: 20px;
-				border-radius: 8px;
-				}
-				}
-
-				.blue-box { @apply --colored-box(#2196f3, white); }
-				.green-box { @apply --colored-box(#4caf50, white); }
-				.coral-box { @apply --colored-box(coral, white); }</div>
-			<div class="example-result" style="display: flex; gap: 10px; flex-wrap: wrap;">
-				<div class="blue-box">Blue Box</div>
-				<div class="green-box">Green Box</div>
-				<div class="coral-box">Coral Box</div>
+			<div class="example">
+				<h3>1. Simple Macro — Reusable Card Base</h3>
+				<div class="example-code">
+					@macro --card-base { padding: 20px; border-radius: 8px;
+					box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); } .simple-card {
+					@apply --card-base; background-color: #e3f2fd; }
+				</div>
+				<div class="example-result simple-card">
+					This card uses the <code>--card-base</code> macro for
+					consistent styling!
+				</div>
 			</div>
-		</div>
 
-		<div class="example">
-			<h3>5. Responsive Text Mixin</h3>
-			<div class="example-code">@mixin --responsive-text(--large-size: 24px, --small-size: 16px) {
-				@result {
-				font-size: var(--large-size);
-				@media (width &lt; 768px) {
-				font-size: var(--small-size);
-				}
-				}
-				}
-
-				.responsive-heading { @apply --responsive-text(28px, 18px); }</div>
-			<div class="example-result responsive-heading">
-				This heading changes size based on screen width!
+			<div class="example">
+				<h3>2. Macro — Reset List</h3>
+				<div class="example-code">
+					@macro --reset-list { margin: 0; padding: 0; list-style:
+					none; } .nav-list { @apply --reset-list; }
+				</div>
+				<div class="example-result">
+					<ul class="nav-list">
+						<li>Home</li>
+						<li>About</li>
+						<li>Contact</li>
+						<li>Blog</li>
+					</ul>
+				</div>
 			</div>
-		</div>
 
-		<div class="example">
-			<h3>6. Grid Layout Mixin</h3>
-			<div class="example-code">@mixin --grid-layout(--columns: repeat(3, 1fr), --gap: 20px) {
-				@result {
-				display: grid;
-				grid-template-columns: var(--columns);
-				gap: var(--gap);
-				}
-				}
+			<div class="example">
+				<h3>3. Combining Multiple Macros</h3>
+				<div class="example-code">
+					.centered-box { @apply --center-text; @apply --card-base;
+					background-color: #fff3e0; }
+				</div>
+				<div class="example-result centered-box">
+					This box combines two macros: centering and card base!
+				</div>
+			</div>
 
-				.grid-container { @apply --grid-layout(repeat(3, 1fr), 15px); }</div>
-			<div class="example-result">
-				<div class="grid-container">
-					<div>Item 1</div>
-					<div>Item 2</div>
-					<div>Item 3</div>
+			<div class="example">
+				<h3>4. Parameterized Mixin — Colored Box</h3>
+				<div class="example-code">
+					@mixin --colored-box(--bg &lt;color&gt;: lightblue, --text
+					&lt;color&gt;: black) { @result { background-color:
+					var(--bg); color: var(--text); padding: 20px; border-radius:
+					8px; } } .blue-box { @apply --colored-box(#2196f3, white); }
+					.green-box { @apply --colored-box(#4caf50, white); }
+					.coral-box { @apply --colored-box(coral, white); }
+				</div>
+				<div
+					class="example-result"
+					style="display: flex; gap: 10px; flex-wrap: wrap"
+				>
+					<div class="blue-box">Blue Box</div>
+					<div class="green-box">Green Box</div>
+					<div class="coral-box">Coral Box</div>
+				</div>
+			</div>
+
+			<div class="example">
+				<h3>5. Responsive Text Mixin</h3>
+				<div class="example-code">
+					@mixin --responsive-text(--large-size: 24px, --small-size:
+					16px) { @result { font-size: var(--large-size); @media
+					(width &lt; 768px) { font-size: var(--small-size); } } }
+					.responsive-heading { @apply --responsive-text(28px, 18px);
+					}
+				</div>
+				<div class="example-result responsive-heading">
+					This heading changes size based on screen width!
+				</div>
+			</div>
+
+			<div class="example">
+				<h3>6. Grid Layout Mixin</h3>
+				<div class="example-code">
+					@mixin --grid-layout(--columns: repeat(3, 1fr), --gap: 20px)
+					{ @result { display: grid; grid-template-columns:
+					var(--columns); gap: var(--gap); } } .grid-container {
+					@apply --grid-layout(repeat(3, 1fr), 15px); }
+				</div>
+				<div class="example-result">
+					<div class="grid-container">
+						<div>Item 1</div>
+						<div>Item 2</div>
+						<div>Item 3</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="example">
+				<h3>7. Theme Card Mixin</h3>
+				<div class="example-code">
+					@mixin --theme-card(--bg &lt;color&gt;: #fff, --fg
+					&lt;color&gt;: #333, --border &lt;color&gt;: #ddd) { @result
+					{ background-color: var(--bg); color: var(--fg); border: 1px
+					solid var(--border); } } .dark-card { @apply
+					--theme-card(#2d3748, #e2e8f0, #4a5568); } .light-card {
+					@apply --theme-card(#ffffff, #2d3748, #e2e8f0); }
+				</div>
+				<div
+					class="example-result"
+					style="display: flex; gap: 10px; flex-wrap: wrap"
+				>
+					<div class="dark-card">Dark Theme Card</div>
+					<div class="light-card">Light Theme Card</div>
 				</div>
 			</div>
 		</div>
 
-		<div class="example">
-			<h3>7. Theme Card Mixin</h3>
-			<div class="example-code">@mixin --theme-card(--bg &lt;color&gt;: #fff, --fg &lt;color&gt;: #333, --border
-				&lt;color&gt;: #ddd) {
-				@result {
-				background-color: var(--bg);
-				color: var(--fg);
-				border: 1px solid var(--border);
+		<script type="module">
+			import {
+				init,
+				hasNativeSupport,
+				refresh
+			} from "../packages/css-mixin-polyfill/dist/index.umd.js";
+
+			// Initialize the polyfill
+			const polyfill = init({ debug: true });
+
+			// Update status indicator
+			function updateStatus() {
+				const statusEl = document.getElementById("status");
+				const hasNative = hasNativeSupport();
+
+				if (hasNative) {
+					statusEl.textContent =
+						"Native CSS @mixin/@macro support detected";
+					statusEl.className = "status-indicator native-support";
+				} else {
+					statusEl.textContent = "CSS Mixin/Macro Polyfill is active";
+					statusEl.className = "status-indicator polyfill-active";
 				}
-				}
-
-				.dark-card { @apply --theme-card(#2d3748, #e2e8f0, #4a5568); }
-				.light-card { @apply --theme-card(#ffffff, #2d3748, #e2e8f0); }</div>
-			<div class="example-result" style="display: flex; gap: 10px; flex-wrap: wrap;">
-				<div class="dark-card">Dark Theme Card</div>
-				<div class="light-card">Light Theme Card</div>
-			</div>
-		</div>
-	</div>
-
-	<script type="module">
-		import {
-			init,
-			hasNativeSupport,
-			refresh,
-		} from "../packages/css-mixin-polyfill/dist/index.umd.js";
-
-		// Initialize the polyfill
-		const polyfill = init({ debug: true });
-
-		// Update status indicator
-		function updateStatus() {
-			const statusEl = document.getElementById("status");
-			const hasNative = hasNativeSupport();
-
-			if (hasNative) {
-				statusEl.textContent = "Native CSS @mixin/@macro support detected";
-				statusEl.className = "status-indicator native-support";
-			} else {
-				statusEl.textContent = "CSS Mixin/Macro Polyfill is active";
-				statusEl.className = "status-indicator polyfill-active";
 			}
-		}
 
-		// Control functions
-		document.querySelector(".refreshPolyfill").onclick = function () {
-			refresh();
-			console.log("Polyfill refreshed");
-		};
+			// Control functions
+			document.querySelector(".refreshPolyfill").onclick = function () {
+				refresh();
+				console.log("Polyfill refreshed");
+			};
 
-		let debugEnabled = true;
-		document.querySelector(".toggleDebug").onclick = function () {
-			debugEnabled = !debugEnabled;
-			polyfill.options.debug = debugEnabled;
-			console.log(
-				"Debug mode:",
-				debugEnabled ? "enabled" : "disabled",
-			);
-		};
+			let debugEnabled = true;
+			document.querySelector(".toggleDebug").onclick = function () {
+				debugEnabled = !debugEnabled;
+				polyfill.options.debug = debugEnabled;
+				console.log(
+					"Debug mode:",
+					debugEnabled ? "enabled" : "disabled"
+				);
+			};
 
-		// Initialize on page load
-		document.addEventListener("DOMContentLoaded", function () {
-			updateStatus();
-		});
-	</script>
-</body>
-
+			// Initialize on page load
+			document.addEventListener("DOMContentLoaded", function () {
+				updateStatus();
+			});
+		</script>
+	</body>
 </html>

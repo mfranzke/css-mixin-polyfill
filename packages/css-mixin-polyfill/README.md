@@ -75,8 +75,8 @@ Or include it via script tag:
 import { init } from "css-mixin-polyfill";
 
 const polyfill = init({
-  debug: true,
-  autoInit: true,
+	debug: true,
+	autoInit: true
 });
 ```
 
@@ -110,25 +110,25 @@ A `@mixin` defines a reusable block of styles that accepts parameters with optio
 
 ```css
 @mixin --gradient-text(
-  --from <color>: mediumvioletred,
-  --to <color>: teal,
-  --angle: to bottom right
+	--from <color>: mediumvioletred,
+	--to <color>: teal,
+	--angle: to bottom right
 ) {
-  --gradient: linear-gradient(var(--angle), var(--from), var(--to));
-  @result {
-    color: var(--from);
+	--gradient: linear-gradient(var(--angle), var(--from), var(--to));
+	@result {
+		color: var(--from);
 
-    @supports (background-clip: text) or (-webkit-background-clip: text) {
-      background: var(--gradient);
-      color: transparent;
-      -webkit-background-clip: text;
-      background-clip: text;
-    }
-  }
+		@supports (background-clip: text) or (-webkit-background-clip: text) {
+			background: var(--gradient);
+			color: transparent;
+			-webkit-background-clip: text;
+			background-clip: text;
+		}
+	}
 }
 
 h1 {
-  @apply --gradient-text(pink, powderblue);
+	@apply --gradient-text(pink, powderblue);
 }
 ```
 
@@ -142,26 +142,26 @@ A `@macro` is a simplified variant of a `@mixin` that takes no arguments and has
 
 ```css
 @macro --reset-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
+	margin: 0;
+	padding: 0;
+	list-style: none;
 }
 
 @macro --visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
 }
 
 .nav {
-  @apply --reset-list;
+	@apply --reset-list;
 }
 
 .sr-only {
-  @apply --visually-hidden;
+	@apply --visually-hidden;
 }
 ```
 
@@ -171,22 +171,22 @@ The `@apply` rule substitutes a mixin or macro’s result into the current style
 
 ```css
 .foo {
-  /* No arguments */
-  @apply --reset-list;
+	/* No arguments */
+	@apply --reset-list;
 
-  /* With arguments */
-  @apply --gradient-text(hotpink, deepskyblue);
+	/* With arguments */
+	@apply --gradient-text(hotpink, deepskyblue);
 
-  /* With a contents block */
-  @apply --responsive-wrapper {
-    display: flex;
-    flex-flow: column;
-  }
+	/* With a contents block */
+	@apply --responsive-wrapper {
+		display: flex;
+		flex-flow: column;
+	}
 
-  /* With both arguments and contents */
-  @apply --card(16px) {
-    background: white;
-  }
+	/* With both arguments and contents */
+	@apply --card(16px) {
+		background: white;
+	}
 }
 ```
 
@@ -196,26 +196,26 @@ A mixin or macro can accept a contents block from the caller using `@contents`. 
 
 ```css
 @macro --one-column {
-  @media (width <= 800px) {
-    @contents;
-  }
+	@media (width <= 800px) {
+		@contents;
+	}
 }
 
 @macro --two-column {
-  @media (width > 800px) {
-    @contents;
-  }
+	@media (width > 800px) {
+		@contents;
+	}
 }
 
 body {
-  @apply --one-column {
-    display: flex;
-    flex-flow: column;
-  }
-  @apply --two-column {
-    display: grid;
-    grid-template-columns: 1fr 3fr;
-  }
+	@apply --one-column {
+		display: flex;
+		flex-flow: column;
+	}
+	@apply --two-column {
+		display: grid;
+		grid-template-columns: 1fr 3fr;
+	}
 }
 ```
 
@@ -223,23 +223,23 @@ body {
 
 ```css
 @mixin --card() {
-  @result {
-    @contents {
-      padding: 1rem;
-    }
-  }
+	@result {
+		@contents {
+			padding: 1rem;
+		}
+	}
 }
 
 .default-card {
-  @apply --card;
-  /* Uses fallback: padding: 1rem */
+	@apply --card;
+	/* Uses fallback: padding: 1rem */
 }
 
 .custom-card {
-  @apply --card {
-    padding: 2rem;
-    border-radius: 8px;
-  }
+	@apply --card {
+		padding: 2rem;
+		border-radius: 8px;
+	}
 }
 ```
 
@@ -249,31 +249,31 @@ body {
 
 ```css
 @mixin --button(
-  --bg <color>: #3b82f6,
-  --text <color>: white,
-  --radius <length>: 6px
+	--bg <color>: #3b82f6,
+	--text <color>: white,
+	--radius <length>: 6px
 ) {
-  @result {
-    background-color: var(--bg);
-    color: var(--text);
-    border: none;
-    border-radius: var(--radius);
-    padding: 0.5em 1em;
-    cursor: pointer;
-  }
+	@result {
+		background-color: var(--bg);
+		color: var(--text);
+		border: none;
+		border-radius: var(--radius);
+		padding: 0.5em 1em;
+		cursor: pointer;
+	}
 }
 
 .btn-primary {
-  @apply --button;
+	@apply --button;
 }
 
 .btn-danger {
-  @apply --button(#ef4444, white, 8px);
+	@apply --button(#ef4444, white, 8px);
 }
 
 .btn-outline {
-  @apply --button(transparent, #3b82f6);
-  border: 2px solid #3b82f6;
+	@apply --button(transparent, #3b82f6);
+	border: 2px solid #3b82f6;
 }
 ```
 
@@ -281,19 +281,22 @@ body {
 
 ```css
 @mixin --responsive-grid(--min-col-width: 250px, --gap: 1rem) {
-  @result {
-    display: grid;
-    gap: var(--gap);
-    grid-template-columns: repeat(auto-fit, minmax(var(--min-col-width), 1fr));
-  }
+	@result {
+		display: grid;
+		gap: var(--gap);
+		grid-template-columns: repeat(
+			auto-fit,
+			minmax(var(--min-col-width), 1fr)
+		);
+	}
 }
 
 .product-grid {
-  @apply --responsive-grid(300px, 2rem);
+	@apply --responsive-grid(300px, 2rem);
 }
 
 .photo-gallery {
-  @apply --responsive-grid(200px);
+	@apply --responsive-grid(200px);
 }
 ```
 
@@ -302,32 +305,35 @@ body {
 Mixins can invoke other mixins inside their `@result` blocks:
 
 ```css
-@mixin --squish(--left-color <color>, --right-color <color>: var(--left-color)) {
-  @result {
-    &::before {
-      content: "▶";
-      background-color: var(--left-color);
-    }
-    &::after {
-      content: "◀";
-      background-color: var(--right-color);
-    }
-  }
+@mixin --squish(
+	--left-color <color>,
+	--right-color <color>: var(--left-color)
+) {
+	@result {
+		&::before {
+			content: "▶";
+			background-color: var(--left-color);
+		}
+		&::after {
+			content: "◀";
+			background-color: var(--right-color);
+		}
+	}
 }
 
 @mixin --colorized-squish(--color <color>) {
-  @result {
-    background-color: var(--color);
-    border: 2px solid oklch(from var(--color) calc(l - 0.1) c h);
-    @apply --squish(
+	@result {
+		background-color: var(--color);
+		border: 2px solid oklch(from var(--color) calc(l - 0.1) c h);
+		@apply --squish(
       oklch(from var(--color) calc(l - 0.3) c h),
       oklch(from var(--color) calc(l - 0.2) c h)
     );
-  }
+	}
 }
 
 .decorated {
-  @apply --colorized-squish(tomato);
+	@apply --colorized-squish(tomato);
 }
 ```
 
@@ -335,24 +341,24 @@ Mixins can invoke other mixins inside their `@result` blocks:
 
 ```css
 @macro --focus-ring {
-  &:focus-visible {
-    outline: 2px solid currentColor;
-    outline-offset: 2px;
-  }
+	&:focus-visible {
+		outline: 2px solid currentColor;
+		outline-offset: 2px;
+	}
 }
 
 @macro --prefers-reduced-motion {
-  @media (prefers-reduced-motion: reduce) {
-    @contents {
-      animation: none;
-      transition: none;
-    }
-  }
+	@media (prefers-reduced-motion: reduce) {
+		@contents {
+			animation: none;
+			transition: none;
+		}
+	}
 }
 
 .interactive {
-  @apply --focus-ring;
-  @apply --prefers-reduced-motion;
+	@apply --focus-ring;
+	@apply --prefers-reduced-motion;
 }
 ```
 
@@ -366,10 +372,10 @@ npx css-mixin-polyfill <input.css> [output.css] [--minify] [--stats]
 
 **Options:**
 
-| Option      | Description                                |
-| ----------- | ------------------------------------------ |
-| `--minify`  | Minify the output CSS                      |
-| `--stats`   | Print transformation statistics            |
+| Option     | Description                     |
+| ---------- | ------------------------------- |
+| `--minify` | Minify the output CSS           |
+| `--stats`  | Print transformation statistics |
 
 **Examples:**
 
@@ -394,8 +400,8 @@ Initialize the polyfill. Processes existing stylesheets and watches for dynamica
 import { init } from "css-mixin-polyfill";
 
 const polyfill = init({
-  debug: false,    // Enable debug logging
-  autoInit: true,  // Automatically process existing stylesheets
+	debug: false, // Enable debug logging
+	autoInit: true // Automatically process existing stylesheets
 });
 ```
 
@@ -434,7 +440,7 @@ Check if the browser natively supports CSS `@mixin`, `@macro`, and `@apply` rule
 import { hasNativeSupport } from "css-mixin-polyfill";
 
 if (hasNativeSupport()) {
-  console.log("Native CSS mixin support available!");
+	console.log("Native CSS mixin support available!");
 }
 ```
 
