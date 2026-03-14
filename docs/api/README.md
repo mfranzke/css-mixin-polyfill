@@ -1,118 +1,38 @@
-# CSS cssMixinMacroPolyfill API Documentation
+# API Documentation Overview
 
-## Installation
+This directory contains supplementary API notes. The full API reference lives in the parent directory:
 
-```bash
-npm install css-mixin-polyfill
-```
+**[docs/API.md](../API.md)**
 
-## CDN Usage
+That document covers:
 
-```html
-<script
-	type="module"
-	src="https://cdn.jsdelivr.net/npm/css-mixin-polyfill/dist/index.modern.js"
-></script>
-```
+- **Core Polyfill** (`css-mixin-polyfill`) — `init()`, `processCSSText()`, `hasNativeSupport()`, `refresh()`, `buildTimeTransform()`
+- **Transform Engine Exports** — `transformToNativeCSS`, `parseCSSRules`, `parseMixinDefinition`, `parseMacroDefinition`, `extractResultBlocks`, `findApplyRules`, `substituteParams`, `substituteContents`, `processApplyInBody`, and more
+- **PostCSS Plugin** (`postcss-transform-mixins`) — build-time transformation of `@mixin`, `@macro`, and `@apply` rules
+- **CLI Tool** — command-line interface for build-time CSS transformation
+- **CSS Syntax Reference** — `@mixin`, `@macro`, `@apply`, `@result`, `@contents`, parameter handling, and last-definition-wins semantics
 
-## ESM Import
-
-```javascript
-import { init } from "css-mixin-polyfill";
-
-// Initialize the polyfill
-init();
-```
-
-## CommonJS Require
-
-```javascript
-const { init } = require("css-mixin-polyfill");
-
-// Initialize the polyfill
-init();
-```
-
-## API Reference
-
-### `init(options?)`
-
-Initializes the CSS cssmixinmacropolyfill.
-
-**Parameters:**
-
-- `options` (optional): Configuration object
-- `debug` (boolean): Enable debug logging (default: false)
-- `autoInit` (boolean): Auto-initialize on DOMContentLoaded (default: true)
-
-### `processCSSText(cssText, options?, element?)`
-
-Manually process CSS text containing mixins.
-
-**Parameters:**
-
-- `cssText` (string): CSS text to process
-- `options` (optional): Processing options
-- `element` (optional): DOM element for media query tracking
-
-**Returns:** Processed CSS text
-
-### `hasNativeMixinSupport()` & `hasNativeMacroSupport()`
-
-Check if the browser has native CSS mixin or macro support.
-
-**Returns:** boolean
-
-### `refresh()`
-
-Manually trigger processing of existing stylesheets.
-
-### `cleanup()`
-
-Clean up media query listeners to prevent memory leaks.
-
-## CSS Syntax
-
-### Basic CSS mixinSyntax
+## Quick Example
 
 ```css
-.element {
-	color: if(condition: value; else: fallback);
+@macro --reset-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.nav {
+	@apply --reset-list;
 }
 ```
 
-### Supported Condition Types
-
-#### style() Conditions
-
 ```css
-.element {
-	color: if(style(--custom-property): red; else: blue);
+/* Output */
+.nav {
+	margin: 0;
+	padding: 0;
+	list-style: none;
 }
 ```
 
-#### media() Conditions
-
-```css
-.element {
-	background: if(media(min-width: 768px): lightblue; else: lightcoral);
-}
-```
-
-#### supports() Conditions
-
-```css
-.element {
-	display: if(supports(display: grid): grid; else: block);
-}
-```
-
-### Multiple Conditions
-
-```css
-.element {
-	color: if(
-		media(min-width: 768px): blue; supports(color: red): red; else: black
-	);
-}
-```
+See the [full API documentation](../API.md) for installation, usage, and detailed reference.

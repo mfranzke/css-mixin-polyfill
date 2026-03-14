@@ -100,42 +100,20 @@ export function normalizeCSS(css) {
  */
 export const basicFixtureTests = [
 	{
-		fixture: 'basic-media',
-		description: 'transform media queries to native CSS'
+		fixture: 'macro.simple',
+		description: 'transform simple @macro with @apply'
 	},
 	{
-		fixture: 'basic-supports',
-		description: 'transform supports queries to native CSS'
+		fixture: 'mixin.basic',
+		description: 'transform @mixin with @result and @apply'
 	},
 	{
-		fixture: 'complex-media-query',
-		description: 'handle complex media queries'
-	},
-	{
-		fixture: 'multiple-functions-one-rule',
-		description: 'handle multiple functions in one rule'
-	},
-	{
-		fixture: 'with-comments',
-		description: 'handle CSS with comments'
-	},
-	{
-		fixture: 'no-mixins',
-		description: 'preserve CSS without mixins'
+		fixture: 'macro.contents',
+		description: 'handle @macro with @contents substitution'
 	}
 ];
 
 /**
  * PostCSS-specific test configurations (includes additional fixtures used only by PostCSS)
  */
-export const postcssFixtureTests = [
-	...basicFixtureTests,
-	{
-		fixture: 'multiple-separate-functions',
-		description: 'handle multiple separate mixins'
-	},
-	{
-		fixture: 'multiple-concatenated-conditions',
-		description: 'handle multiple CSS mixinconditions'
-	}
-];
+export const postcssFixtureTests = [...basicFixtureTests];

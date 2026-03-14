@@ -1,0 +1,10 @@
+/* https://github.com/web-platform-tests/wpt/blob/master/css/css-mixins/mixin-declarations.html */
+@mixin --m1() {
+	@result {
+		color: green;
+	}
+}
+div {
+	color: red;
+	@apply --m1;
+}

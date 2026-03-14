@@ -2,7 +2,7 @@
   "name": "css-mixin-polyfill-monorepo",
   "version": "",
   "type": "module",
-  "description": "A JavaScript polyfill and PostCSS plugin for CSS mixinality with style(), media(), and supports() functions",
+  "description": "A JavaScript polyfill and PostCSS plugin for CSS @mixin, @macro, and @apply rules",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mfranzke/css-mixin-polyfill.git"
@@ -21,11 +21,11 @@
   "keywords": [
     "css",
     "polyfill",
-    "conditional",
-    "if",
-    "media-query",
-    "supports",
-    "style"
+    "mixin",
+    "macro",
+    "apply",
+    "at-rule",
+    "reusable-styles"
   ],
   "scripts": {
     "build": "pnpm --recursive run build",

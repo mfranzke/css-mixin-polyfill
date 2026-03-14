@@ -1,4 +1,4 @@
-# CSS mixin Polyfill v0.1
+# CSS Mixin Polyfill
 
 [![MIT license](https://img.shields.io/npm/l/css-mixin-polyfill.svg "license badge")](https://opensource.org/licenses/mit-license.php)
 
@@ -15,31 +15,21 @@
 [![Open Source Love](https://badges.frapsoft.com/os/v3/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.0-4baaaa.svg)](CODE-OF-CONDUCT.md)
 
-A modern JavaScript polyfill for the [CSS `if()` function](https://developer.mozilla.org/en-US/docs/Web/CSS/if) with **hybrid build-time and runtime processing**. Transforms CSS `if()` functions to native `@media` and `@supports` rules where possible, with runtime fallback for dynamic conditions.
-
-## 🚀 What's New in v0.1
-
-- **🏗️ Build-time Transformation** - Convert `media()` and `supports()` conditions to native CSS
-- **⚡ Zero Runtime Cost** - Native CSS rules require no JavaScript processing
-- **🔄 Hybrid Processing** - Automatic routing between native and runtime processing
-- **🛠️ CLI Tool** - Transform CSS files during build process
-- **📈 Performance Optimized** - Up to 95% faster for transformable conditions
-- **🔧 Backwards Compatible** - Existing code continues to work unchanged
+A JavaScript polyfill for [CSS `@mixin`, `@macro`, and `@apply` rules](https://drafts.csswg.org/css-mixins/) with **hybrid build-time and runtime processing**. Define reusable style blocks with `@mixin` and `@macro`, then apply them anywhere with `@apply`.
 
 ## Features
 
-- ✅ **Hybrid Architecture** with build-time + runtime processing
-- ✅ **Native CSS Generation** for `media()` and `supports()` conditions
-- ✅ **Runtime Processing** for dynamic `style()` conditions
-- ✅ **CLI Tool** for build-time transformation with statistics
-- ✅ **Multiple conditions** within a single mixin
-- ✅ **Shorthand property support** for complex CSS values
-- ✅ **Automatic fallback** for unsupported browsers
-- ✅ **Real-time processing** of dynamic stylesheets
+- ✅ **`@mixin` rules** with parameters, default values, type constraints, and `@result` blocks
+- ✅ **`@macro` rules** for simple, argument-free reusable style blocks
+- ✅ **`@apply` rules** to invoke mixins and macros, with arguments and contents blocks
+- ✅ **`@contents` blocks** for caller-provided style injection
+- ✅ **Local variables** scoped within mixin bodies, with hygienic renaming
+- ✅ **Nested `@apply`** — mixins and macros can invoke other mixins and macros
+- ✅ **Build-time transformation** via CLI for zero-runtime-cost output
+- ✅ **Runtime processing** for dynamic stylesheets
 - ✅ **TypeScript support** with full type definitions
-- ✅ **Zero dependencies** - Pure JavaScript implementation
-- ✅ **Comprehensive test suite** with 95%+ coverage
-- ✅ **Multiple build formats** (ES6, CommonJS, UMD)
+- ✅ **Zero dependencies** — pure JavaScript implementation
+- ✅ **Multiple build formats** (ES module, CommonJS, UMD)
 
 ## Installation
 
@@ -52,7 +42,6 @@ npm install css-mixin-polyfill
 ### Build-time Transformation (Recommended)
 
 ```bash
-# Transform CSS during build
 npx css-mixin-polyfill input.css output.css --minify --stats
 ```
 
@@ -61,15 +50,14 @@ npx css-mixin-polyfill input.css output.css --minify --stats
 ```javascript
 import { init } from "css-mixin-polyfill";
 
-// Initialize with hybrid processing
-init({ useNativeTransform: true });
+init();
 ```
 
 ## Usage
 
-### Automatic Initialization (Recommended)
+### Automatic Initialization
 
-Simply import the polyfill and it will automatically initialize:
+Simply import the polyfill and it will automatically process stylesheets containing `@mixin`, `@macro`, and `@apply` rules:
 
 ```javascript
 import "css-mixin-polyfill";
@@ -86,248 +74,378 @@ Or include it via script tag:
 ```javascript
 import { init } from "css-mixin-polyfill";
 
-// Initialize with options
 const polyfill = init({
-	debug: true,
-	autoInit: true
+  debug: true,
+  autoInit: true,
 });
 ```
 
-### Processing CSS Text
+### Processing CSS Text Directly
 
 ```javascript
 import { processCSSText } from "css-mixin-polyfill";
 
-const css = ".button { color: if(media(width >= 768px): blue; else: red); }";
+const css = `
+@mixin --highlight(--color <color>: gold) {
+  @result {
+    background-color: var(--color);
+    font-weight: bold;
+  }
+}
+
+.alert {
+  @apply --highlight(tomato);
+}
+`;
+
 const processed = processCSSText(css);
-console.log(processed); // .button { color: red; } @media(width >= 768px) { .button { color: blue; } }
+// .alert { background-color: tomato; font-weight: bold; }
 ```
 
-## CSS mixinSyntax
+## CSS Syntax
 
-The polyfill supports the following CSS mixinsyntax:
+### `@mixin` — Reusable Styles with Parameters
 
-```css
-property: if(condition: value; else: value-if-false);
-```
-
-**Note:** The `else` clause is optional. If omitted and the condition is false, an empty value will be used.
-
-## Enhanced Features
-
-### 1. Multiple Conditions within Single if()
-
-You can now use multiple conditions within a single `if()` function, where each condition is tested sequentially until one matches:
+A `@mixin` defines a reusable block of styles that accepts parameters with optional types and default values. The styles to emit are wrapped in a `@result` block.
 
 ```css
-.element {
-	/* Multiple conditions tested in order */
-	background: if(
-		style(--scheme: ice): linear-gradient(#caf0f8, white, #caf0f8) ;
-			style(--scheme: fire): linear-gradient(#ffc971, white, #ffc971) ;
-			style(--scheme: earth): linear-gradient(#8fbc8f, white, #8fbc8f) ;
-			else: linear-gradient(#e0e0e0, white, #e0e0e0) ;
-	);
+@mixin --gradient-text(
+  --from <color>: mediumvioletred,
+  --to <color>: teal,
+  --angle: to bottom right
+) {
+  --gradient: linear-gradient(var(--angle), var(--from), var(--to));
+  @result {
+    color: var(--from);
+
+    @supports (background-clip: text) or (-webkit-background-clip: text) {
+      background: var(--gradient);
+      color: transparent;
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+  }
+}
+
+h1 {
+  @apply --gradient-text(pink, powderblue);
 }
 ```
 
-### 2. Shorthand Property Support
+- **Parameters** are declared as custom properties with optional `<type>` constraints and `: default` values.
+- **Local variables** (custom properties outside `@result`) are scoped to the mixin body and won’t leak into element styles.
+- **`@result`** marks the styles that will be substituted at the `@apply` site.
 
-Use mixins within CSS shorthand properties:
+### `@macro` — Simple Reusable Styles
+
+A `@macro` is a simplified variant of a `@mixin` that takes no arguments and has no local variables. Its body is directly substituted at the `@apply` site.
 
 ```css
-.element {
-	/* Border shorthand with conditional values */
-	border: if(
-			style(--scheme: ice): 3px; style(--scheme: fire): 5px; else: 1px;
-		)
-		if(supports(border-style: dashed): dashed; else: solid)
-		if(
-			style(--scheme: ice): #0ea5e9; style(--scheme: fire): #f97316;
-				else: #6b7280
-		);
+@macro --reset-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
 
-	/* Font shorthand with multiple conditions */
-	font:
-		if(
-				media(width >= 1200px): bold; media(width >= 768px): 600;
-					else: normal
-			)
-			if(media(width >= 768px): 18px; else: 14px) / 1.5 system-ui,
-		sans-serif;
+@macro --visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.nav {
+  @apply --reset-list;
+}
+
+.sr-only {
+  @apply --visually-hidden;
 }
 ```
 
-## Supported Condition Types
+### `@apply` — Invoking Mixins and Macros
 
-### 1. Media Queries with `media()`
+The `@apply` rule substitutes a mixin or macro’s result into the current style rule.
 
 ```css
-.responsive-text {
-	font-size: if(
-		media(width >= 1200px): 24px; media(width >= 768px): 18px; else: 16px
-	);
+.foo {
+  /* No arguments */
+  @apply --reset-list;
+
+  /* With arguments */
+  @apply --gradient-text(hotpink, deepskyblue);
+
+  /* With a contents block */
+  @apply --responsive-wrapper {
+    display: flex;
+    flex-flow: column;
+  }
+
+  /* With both arguments and contents */
+  @apply --card(16px) {
+    background: white;
+  }
 }
 ```
 
-### 2. Feature Detection with `supports()`
+### `@contents` — Caller-Provided Styles
+
+A mixin or macro can accept a contents block from the caller using `@contents`. This lets the caller inject styles into a predefined structure.
 
 ```css
-.modern-layout {
-	display: if(
-		supports(display: subgrid): subgrid; supports(display: grid): grid;
-			supports(display: flex): flex; else: block
-	);
+@macro --one-column {
+  @media (width <= 800px) {
+    @contents;
+  }
+}
+
+@macro --two-column {
+  @media (width > 800px) {
+    @contents;
+  }
+}
+
+body {
+  @apply --one-column {
+    display: flex;
+    flex-flow: column;
+  }
+  @apply --two-column {
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+  }
 }
 ```
 
-### 3. Style Queries with `style()`
+`@contents` can also specify a fallback block that is used when no contents block is passed:
 
 ```css
-.theme-aware {
-	color: if(
-		style(--theme: dark): white; style(--theme: light): black;
-			style(--theme: blue): #1e40af; else: #374151
-	);
+@mixin --card() {
+  @result {
+    @contents {
+      padding: 1rem;
+    }
+  }
 }
-```
 
-### 4. Boolean Conditions
+.default-card {
+  @apply --card;
+  /* Uses fallback: padding: 1rem */
+}
 
-```css
-.debug-mode {
-	border: if(style(--true): 2px solid red; else: none);
-	opacity: if(style(--false): 0.5; else: 1);
+.custom-card {
+  @apply --card {
+    padding: 2rem;
+    border-radius: 8px;
+  }
 }
 ```
 
 ## Advanced Examples
 
-### Theme-Based Styling
+### Design Tokens with Mixins
 
 ```css
-.card {
-	background: if(
-		style(--scheme: ice): linear-gradient(135deg, #caf0f8, white, #caf0f8) ;
-			style(--scheme: fire): linear-gradient(
-				135deg,
-				#ffc971,
-				white,
-				#ffc971
-			)
-			;
-			style(--scheme: earth): linear-gradient(
-				135deg,
-				#8fbc8f,
-				white,
-				#8fbc8f
-			)
-			; else: linear-gradient(135deg, #e0e0e0, white, #e0e0e0) ;
-	);
+@mixin --button(
+  --bg <color>: #3b82f6,
+  --text <color>: white,
+  --radius <length>: 6px
+) {
+  @result {
+    background-color: var(--bg);
+    color: var(--text);
+    border: none;
+    border-radius: var(--radius);
+    padding: 0.5em 1em;
+    cursor: pointer;
+  }
+}
 
-	color: if(
-		style(--theme: dark): #e2e8f0; style(--theme: light): #2d3748;
-			style(--theme: blue): #1e40af; else: #374151;
-	);
+.btn-primary {
+  @apply --button;
+}
+
+.btn-danger {
+  @apply --button(#ef4444, white, 8px);
+}
+
+.btn-outline {
+  @apply --button(transparent, #3b82f6);
+  border: 2px solid #3b82f6;
 }
 ```
 
-### Progressive Enhancement
+### Responsive Layout Mixin
 
 ```css
-.feature-demo {
-	display: if(
-		supports(display: subgrid): subgrid; supports(display: grid): grid;
-			supports(display: flex): flex; else: block;
-	);
+@mixin --responsive-grid(--min-col-width: 250px, --gap: 1rem) {
+  @result {
+    display: grid;
+    gap: var(--gap);
+    grid-template-columns: repeat(auto-fit, minmax(var(--min-col-width), 1fr));
+  }
+}
 
-	gap: if(supports(gap): 20px; else: 0;);
+.product-grid {
+  @apply --responsive-grid(300px, 2rem);
+}
+
+.photo-gallery {
+  @apply --responsive-grid(200px);
 }
 ```
 
-### Responsive Design with Multiple Breakpoints
+### Nested Mixin Invocation
+
+Mixins can invoke other mixins inside their `@result` blocks:
 
 ```css
-.responsive-element {
-	padding: if(
-		media(width >= 1200px): 40px; media(width >= 768px): 30px;
-			media(width >= 480px): 20px; else: 15px;
-	);
+@mixin --squish(--left-color <color>, --right-color <color>: var(--left-color)) {
+  @result {
+    &::before {
+      content: "▶";
+      background-color: var(--left-color);
+    }
+    &::after {
+      content: "◀";
+      background-color: var(--right-color);
+    }
+  }
+}
 
-	font-size: if(
-		media(width >= 1200px): 20px; media(width >= 768px): 18px; else: 16px;
-	);
+@mixin --colorized-squish(--color <color>) {
+  @result {
+    background-color: var(--color);
+    border: 2px solid oklch(from var(--color) calc(l - 0.1) c h);
+    @apply --squish(
+      oklch(from var(--color) calc(l - 0.3) c h),
+      oklch(from var(--color) calc(l - 0.2) c h)
+    );
+  }
+}
+
+.decorated {
+  @apply --colorized-squish(tomato);
 }
 ```
 
-### Accessibility-Aware Animations
+### Accessibility Helpers
 
 ```css
-.animated-element {
-	transition: if(
-		media(prefers-reduced-motion: reduce): none; supports(transition): all
-			0.3s ease; else: none;
-	);
-
-	transform: if(
-		media(prefers-reduced-motion: reduce): none;
-			supports(transform): scale(1) ; else: none;
-	);
+@macro --focus-ring {
+  &:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
 }
+
+@macro --prefers-reduced-motion {
+  @media (prefers-reduced-motion: reduce) {
+    @contents {
+      animation: none;
+      transition: none;
+    }
+  }
+}
+
+.interactive {
+  @apply --focus-ring;
+  @apply --prefers-reduced-motion;
+}
+```
+
+## CLI
+
+Transform CSS files at build time for zero-runtime-cost output:
+
+```bash
+npx css-mixin-polyfill <input.css> [output.css] [--minify] [--stats]
+```
+
+**Options:**
+
+| Option      | Description                                |
+| ----------- | ------------------------------------------ |
+| `--minify`  | Minify the output CSS                      |
+| `--stats`   | Print transformation statistics            |
+
+**Examples:**
+
+```bash
+# Transform and write to a new file
+npx css-mixin-polyfill src/styles.css dist/styles.css
+
+# Transform in place with minification
+npx css-mixin-polyfill styles.css --minify
+
+# Transform and print stats
+npx css-mixin-polyfill input.css output.css --stats
 ```
 
 ## API Reference
 
 ### `init(options)`
 
-Initialize the polyfill with optional configuration.
+Initialize the polyfill. Processes existing stylesheets and watches for dynamically added ones.
 
 ```javascript
+import { init } from "css-mixin-polyfill";
+
 const polyfill = init({
-	debug: false, // Enable debug logging
-	autoInit: true // Automatically process existing stylesheets
+  debug: false,    // Enable debug logging
+  autoInit: true,  // Automatically process existing stylesheets
 });
 ```
 
-### `processCSSText(cssText, options)`
-
-Process CSS text containing mixins.
+Returns an object with instance methods:
 
 ```javascript
-const processed = processCSSText(`
-  .test {
-    color: if(
-      style(--theme: dark): white;
-      style(--theme: light): black;
-      else: gray;
-    );
-  }
-`);
-```
-
-### `hasNativeSupport()`
-
-Check if the browser has native CSS mixin or macro support.
-
-```javascript
-if (hasNativeSupport()) {
-	console.log("Native support available!");
-}
-```
-
-### Instance Methods
-
-```javascript
-const polyfill = init();
-
-// Manually refresh/reprocess all stylesheets
+// Re-process all stylesheets
 polyfill.refresh();
 
-// Check if polyfill is needed
+// Check for native browser support
 polyfill.hasNativeSupport();
 
 // Process specific CSS text
 polyfill.processCSSText(cssText);
+```
+
+### `processCSSText(cssText)`
+
+Process a string of CSS containing `@mixin`, `@macro`, and `@apply` rules. Returns the transformed CSS with all mixins and macros resolved.
+
+```javascript
+import { processCSSText } from "css-mixin-polyfill";
+
+const result = processCSSText(`
+  @macro --bold { font-weight: bold; }
+  .title { @apply --bold; }
+`);
+// .title { font-weight: bold; }
+```
+
+### `hasNativeSupport()`
+
+Check if the browser natively supports CSS `@mixin`, `@macro`, and `@apply` rules. When native support is available, the polyfill is not needed.
+
+```javascript
+import { hasNativeSupport } from "css-mixin-polyfill";
+
+if (hasNativeSupport()) {
+  console.log("Native CSS mixin support available!");
+}
+```
+
+### `buildTimeTransform(cssText)`
+
+Transform CSS at build time, resolving all `@mixin`, `@macro`, and `@apply` rules into plain CSS. Used internally by the CLI tool.
+
+```javascript
+import { buildTimeTransform } from "css-mixin-polyfill";
+
+const output = buildTimeTransform(inputCSS);
 ```
 
 ## Browser Support
@@ -337,7 +455,6 @@ The polyfill works in all modern browsers that support:
 - ES6 (ECMAScript 2015)
 - CSS Object Model
 - MutationObserver
-- matchMedia API
 
 **Tested browsers:**
 
@@ -346,22 +463,12 @@ The polyfill works in all modern browsers that support:
 - Safari 12+
 - Edge 79+
 
-## Performance Considerations
+## Performance
 
-- The polyfill only activates when native CSS mixin or macro support is not available
-- Uses efficient CSS parsing with minimal DOM manipulation
-- Caches evaluation results for better performance
-- Processes stylesheets incrementally to avoid blocking
-- Optimized parsing for multiple conditions and complex shorthand properties
-
-## Examples
-
-The package includes comprehensive examples:
-
-- `examples/index.html` - Basic CSS mixinusage
-- `examples/advanced.html` - Advanced conditional styling
-- `examples/enhanced.html` - Multiple if-tests and shorthand properties
-- `examples/multiple-conditions.html` - Multiple conditions within single if()
+- The polyfill only activates when native CSS `@mixin` / `@macro` / `@apply` support is not available
+- Build-time transformation eliminates runtime cost entirely
+- Efficient CSS parsing with minimal DOM manipulation
+- Caches transformation results for repeated processing
 
 ## Contributing
 
@@ -369,19 +476,16 @@ Please have a look at our [CONTRIBUTION guidelines](https://github.com/mfranzke/
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+MIT License — see [LICENSE](LICENSE) file for details.
 
 ## Credits
 
 - Pure JavaScript implementation with custom CSS parsing
-- Inspired by the CSS Working Group's conditional CSS proposals
+- Based on the [W3C CSS Mixins specification](https://drafts.csswg.org/css-mixins/)
 - Thanks to all contributors and testers
 
 ## Related
 
-- [CSS Conditional Rules](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_conditional_rules) - MDN documentation for @media and @supports
-
-## Further solutions
-
-- [postcss-transform-mixins](https://github.com/mfranzke/css-mixin-polyfill/tree/main/packages/postcss-transform-mixins/) - PostCSS plugin for build-time transformation
-- [stylelint-config-mixin](https://github.com/mfranzke/css-mixin-polyfill/tree/main/packages/stylelint-config-mixin) - Stylelint configuration for linting CSS mixinusage
+- [W3C CSS Mixins specification](https://drafts.csswg.org/css-mixins/) — the official specification
+- [postcss-transform-mixins](https://github.com/mfranzke/css-mixin-polyfill/tree/main/packages/postcss-transform-mixins/) — PostCSS plugin for build-time transformation
+- [stylelint-config-mixin](https://github.com/mfranzke/css-mixin-polyfill/tree/main/packages/stylelint-config-mixin) — Stylelint configuration for CSS mixin usage

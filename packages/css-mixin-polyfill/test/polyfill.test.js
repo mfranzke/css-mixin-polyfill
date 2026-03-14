@@ -1,17 +1,8 @@
 /* global document, describe, test, expect, beforeEach, afterEach */
 
-import { vi } from 'vitest';
 import { hasNativeSupport, init, processCSSText } from '../src/index.js';
 
-describe('CSS cssMixinMacroPolyfill', () => {
-	beforeEach(() => {
-		// Reset CSS.supports mock
-		globalThis.CSS.supports.mockClear();
-
-		// Reset matchMedia mock
-		globalThis.matchMedia.mockClear();
-	});
-
+describe('CSS Mixin and Macro Polyfill', () => {
 	afterEach(() => {
 		document.head.innerHTML = '';
 		document.body.innerHTML = '';
@@ -23,139 +14,116 @@ describe('CSS cssMixinMacroPolyfill', () => {
 			expect(typeof processCSSText).toBe('function');
 			expect(typeof hasNativeSupport).toBe('function');
 		});
-
-		test('should have named function exports', () => {
-			expect(typeof init).toBe('function');
-			expect(typeof processCSSText).toBe('function');
-			expect(typeof hasNativeSupport).toBe('function');
-		});
 	});
 
 	describe('Native Support Detection', () => {
 		test('should detect lack of native support', () => {
 			expect(hasNativeSupport()).toBe(false);
 		});
+	});
 
-		test('should use exported function', () => {
-			expect(hasNativeSupport()).toBe(false);
+	describe('CSS Text Processing - @macro', () => {
+		test('should transform simple @macro with @apply', () => {
+			const cssText = `
+@macro --reset-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.foo {
+  @apply --reset-list;
+}`;
+			const result = processCSSText(cssText);
+
+			expect(result).toContain('margin: 0');
+			expect(result).toContain('padding: 0');
+			expect(result).toContain('list-style: none');
+			expect(result).toContain('.foo');
+			expect(result).not.toContain('@macro');
+			expect(result).not.toContain('@apply');
+		});
+
+		test('should transform @macro with @contents', () => {
+			const cssText = `
+@macro --one-column {
+  @media (width <= 800px) {
+    @contents;
+  }
+}
+body {
+  @apply --one-column {
+    display: flex;
+    flex-flow: column;
+  }
+}`;
+			const result = processCSSText(cssText);
+
+			expect(result).toContain('@media (width <= 800px)');
+			expect(result).toContain('display: flex');
+			expect(result).toContain('flex-flow: column');
+			expect(result).not.toContain('@contents');
+			expect(result).not.toContain('@apply');
 		});
 	});
 
-	describe('Condition Evaluation', () => {
-		test('should evaluate boolean conditions through processCSSText', () => {
-			let result = processCSSText(
-				'.test { color: if(style(--true): red; else: blue); }'
-			);
-			expect(result).toBe('.test { color: blue; }');
+	describe('CSS Text Processing - @mixin', () => {
+		test('should transform @mixin with @result and @apply', () => {
+			const cssText = `
+@mixin --m1() {
+  @result {
+    color: green;
+  }
+}
+div {
+  @apply --m1;
+}`;
+			const result = processCSSText(cssText);
 
-			result = processCSSText(
-				'.test { color: if(false: red; else: blue); }'
-			);
-			expect(result).toBe('.test { color: blue; }');
+			expect(result).toContain('color: green');
+			expect(result).toContain('div');
+			expect(result).not.toContain('@mixin');
+			expect(result).not.toContain('@apply');
+			expect(result).not.toContain('@result');
 		});
 
-		test('should evaluate media conditions through processCSSText', () => {
-			// Mock a matching media query
-			globalThis.matchMedia.mockReturnValue({ matches: true });
+		test('should substitute mixin parameters', () => {
+			const cssText = `
+@mixin --colored(--color <color>: red) {
+  @result {
+    color: var(--color);
+  }
+}
+.test {
+  @apply --colored(blue);
+}`;
+			const result = processCSSText(cssText);
 
-			const result = processCSSText(
-				'.test { color: if(media(width >= 768px): red; else: blue); }'
-			);
-			expect(result).toBe('.test { color: red; }');
-			expect(globalThis.matchMedia).toHaveBeenCalledWith(
-				'(width >= 768px)'
-			);
+			expect(result).toContain('color: blue');
+			expect(result).not.toContain('var(--color)');
 		});
 
-		test('should evaluate supports conditions through processCSSText', () => {
-			// Mock CSS.supports to return true
-			globalThis.CSS.supports.mockReturnValue(true);
+		test('should use default parameter values when no argument provided', () => {
+			const cssText = `
+@mixin --colored(--color <color>: red) {
+  @result {
+    color: var(--color);
+  }
+}
+.test {
+  @apply --colored;
+}`;
+			const result = processCSSText(cssText);
 
-			const result = processCSSText(
-				'.test { color: if(supports(display: grid): red; else: blue); }'
-			);
-			expect(result).toBe('.test { color: red; }');
-			expect(globalThis.CSS.supports).toHaveBeenCalledWith(
-				'display: grid'
-			);
-		});
-
-		test('should evaluate style conditions through processCSSText', () => {
-			// Create a test element
-			const testElement = document.createElement('div');
-			testElement.style.color = 'red';
-			document.body.append(testElement);
-
-			// Mock getComputedStyle
-			const mockComputedStyle = {
-				getPropertyValue: vi.fn().mockReturnValue('red')
-			};
-
-			vi.spyOn(globalThis, 'getComputedStyle').mockReturnValue(
-				mockComputedStyle
-			);
-
-			const result = processCSSText(
-				'.test { color: if(style(color: red): green; else: blue); }'
-			);
-			expect(result).toBe('.test { color: green; }');
-
-			// Cleanup
-			testElement.remove();
-			globalThis.getComputedStyle.mockRestore();
+			expect(result).toContain('color: red');
 		});
 	});
 
-	describe('CSS Text Processing', () => {
-		test('should process simple mixin with new syntax', () => {
-			const cssText =
-				'.test { color: if(style(--true): red; else: blue); }';
+	describe('Pass-through behavior', () => {
+		test('should return CSS unchanged when no @mixin/@macro/@apply present', () => {
+			const cssText = '.test { color: blue; background: white; }';
 			const result = processCSSText(cssText);
 
-			expect(result).toBe('.test { color: blue; }');
-		});
-
-		test('should process CSS mixinwithout else clause', () => {
-			const cssText = '.test { color: if(style(--true): red); }';
-			const result = processCSSText(cssText);
-
-			expect(result).toBe('.test { color: ; }');
-		});
-
-		test('should process CSS mixinwith media condition', () => {
-			// Mock media query to match
-			globalThis.matchMedia.mockReturnValue({ matches: true });
-
-			const cssText =
-				'.test { display: if(media(width >= 768px): block; else: none); }';
-			const result = processCSSText(cssText);
-
-			expect(result).toBe('.test { display: block; }');
-		});
-
-		test('should process CSS mixinwith supports condition', () => {
-			globalThis.CSS.supports.mockReturnValue(true);
-
-			const cssText =
-				'.test { display: if(supports(display: grid): grid; else: block); }';
-			const result = processCSSText(cssText);
-
-			expect(result).toBe('.test { display: grid; }');
-		});
-
-		test('should process multiple mixins', () => {
-			const cssText =
-				'.test { color: if(style(--true): red; else: blue); background: if(style(--false): white; else: black); }';
-			const result = processCSSText(cssText);
-
-			expect(result).toBe('.test { color: blue; background: black; }');
-		});
-
-		test('should handle false condition with no else clause', () => {
-			const cssText = '.test { color: if(false: red); }';
-			const result = processCSSText(cssText);
-
-			expect(result).toBe('.test { color: ; }');
+			expect(result).toBe(cssText);
 		});
 	});
 
@@ -165,46 +133,31 @@ describe('CSS cssMixinMacroPolyfill', () => {
 		});
 
 		test('should export processCSSText function', () => {
-			const result = processCSSText(
-				'.test { color: if(style(--true): red; else: blue); }'
-			);
-			expect(result).toBe('.test { color: blue; }');
+			expect(typeof processCSSText).toBe('function');
 		});
 
 		test('should handle processCSSText with options', () => {
-			const result = processCSSText(
-				'.test { color: if(style(--true): red; else: blue); }',
-				{ debug: true }
-			);
-			expect(result).toBe('.test { color: blue; }');
+			const cssText = `
+@macro --m { color: red; }
+.test { @apply --m; }`;
+			const result = processCSSText(cssText, { debug: true });
+
+			expect(result).toContain('color: red');
 		});
 	});
 
 	describe('Error Handling', () => {
-		test('should handle invalid conditions gracefully', () => {
-			const cssText =
-				'.test { color: if(invalid-condition: red; else: blue); }';
+		test('should remove @apply for undefined mixin/macro', () => {
+			const cssText = '.test { @apply --nonexistent; color: red; }';
 			const result = processCSSText(cssText);
 
-			expect(result).toBe('.test { color: blue; }');
+			expect(result).toContain('color: red');
+			expect(result).not.toContain('@apply');
 		});
 
-		test('should handle malformed mixins', () => {
-			const cssText = '.test { color: if(true, red); }'; // Old syntax should remain unchanged
-			const result = processCSSText(cssText);
-
-			expect(result).toBe('.test { color: if(true, red); }'); // Should remain unchanged
-		});
-
-		test('should handle CSS.supports errors', () => {
-			globalThis.CSS.supports.mockImplementation(() => {
-				throw new Error('CSS.supports error');
-			});
-
-			const result = processCSSText(
-				'.test { color: if(supports(invalid-property): red; else: blue); }'
-			);
-			expect(result).toBe('.test { color: blue; }');
+		test('should handle empty input', () => {
+			const result = processCSSText('');
+			expect(result).toBe('');
 		});
 	});
 });
