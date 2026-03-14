@@ -20,7 +20,7 @@
 		}
 	}
 }
-@mixin --without-argument-list {
+@mixin --missing-argument-list {
 	@result {
 		.cls {
 		color: red;
@@ -42,7 +42,7 @@
 div {
 	@apply --m1;
 	@apply invalid-name;
-	@apply --without-argument-list;
+	@apply --missing-argument-list;
 	@apply --missing-result1;
 	@apply --missing-result2;
 	@apply --empty1;
