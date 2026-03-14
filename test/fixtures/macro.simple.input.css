@@ -1,0 +1,9 @@
+/* https://drafts.csswg.org/css-mixins/#example-56012a8a */
+@macro --reset-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.foo {
+  @apply --reset-list;
+}

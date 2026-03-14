@@ -1,0 +1,83 @@
+{
+  "name": "css-mixin-polyfill-monorepo",
+  "version": "",
+  "type": "module",
+  "description": "A JavaScript polyfill and PostCSS plugin for CSS mixinality with style(), media(), and supports() functions",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mfranzke/css-mixin-polyfill.git"
+  },
+  "homepage": "https://mfranzke.github.io/css-mixin-polyfill/",
+  "bugs": {
+    "url": "https://github.com/mfranzke/css-mixin-polyfill/issues"
+  },
+  "author": "Maximilian Franzke",
+  "license": "MIT",
+  "private": true,
+  "packageManager": "pnpm@10.14.0",
+  "engines": {
+    "node": ">= 22"
+  },
+  "keywords": [
+    "css",
+    "polyfill",
+    "conditional",
+    "if",
+    "media-query",
+    "supports",
+    "style"
+  ],
+  "scripts": {
+    "build": "pnpm --recursive run build",
+    "build:docs": "node scripts/build-docs.js",
+    "changeset": "changeset",
+    "changeset:publish": "pnpm run build && pnpm exec changeset publish",
+    "changeset:version": "changeset version && pnpm install --lockfile-only && prettier '{CHANGELOG.md,packages/*/CHANGELOG.md}' --write",
+    "codestyle": "prettier . --write",
+    "dev": "pnpm --recursive run dev",
+    "lint": "pnpm --parallel run '/^lint:[^:]*$/'",
+    "lint:markdownlint": "markdownlint --config .config/.markdown-lint.yml **/*.md",
+    "lint:packages": "publint packages/css-mixin-polyfill && publint packages/postcss-transform-mixins && publint packages/stylelint-config-mixin",
+    "lint:stylelint": "stylelint test/fixtures/*.input.css --config .config/.stylelintrc.json",
+    "lint:stylelint:14": "npx stylelint@14 test/fixtures/*.input.css --config .config/.stylelintrc.older.json",
+    "lint:stylelint:15": "npx stylelint@15 test/fixtures/*.input.css --config .config/.stylelintrc.older.json",
+    "lint:stylelint:16": "npx stylelint@16 test/fixtures/*.input.css --config .config/.stylelintrc.json",
+    "lint:xo": "xo",
+    "prelint:packages": "pnpm run build",
+    "prepare": "husky",
+    "preserve": "pnpm --filter=css-mixin-polyfill run build",
+    "serve": "http-server -p 3000 -o examples/basic-examples.html",
+    "test": "pnpm --recursive run test"
+  },
+  "devDependencies": {
+    "@babel/core": "7.29.0",
+    "@babel/preset-env": "7.29.0",
+    "@changesets/changelog-github": "0.5.2",
+    "@changesets/cli": "2.29.8",
+    "@commitlint/cli": "20.4.1",
+    "@commitlint/config-conventional": "20.4.1",
+    "@vitest/coverage-v8": "4.0.18",
+    "http-server": "14.1.1",
+    "husky": "9.1.7",
+    "jsdom": "27.2.0",
+    "lint-staged": "16.2.7",
+    "markdownlint-cli": "0.46.0",
+    "microbundle": "0.15.1",
+    "playwright": "1.55.1",
+    "prettier": "3.7.4",
+    "prettier-plugin-organize-imports": "4.3.0",
+    "prettier-plugin-pkg": "0.21.2",
+    "publint": "0.3.17",
+    "stylelint": "^17.1.1",
+    "stylelint-config-standard": "^40.0.0",
+    "vite": "7.2.6",
+    "vitest": "4.0.18",
+    "xo": "1.2.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "qs@>=6.7.0 <=6.14.1": ">=6.14.2",
+      "markdown-it@>=13.0.0 <14.1.1": ">=14.1.1"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+/* https://drafts.csswg.org/css-mixins/#example-91b6faa7 */
+@macro --one-column {
+  @media (width <= 800px) {
+    @contents;
+  }
+}
+@macro --two-column {
+  @media (width > 800px) {
+    @contents;
+  }
+}
+body {
+  @apply --one-column {
+    display: flex;
+    flex-flow: column;
+  }
+  @apply --two-column {
+    display: grid;
+    grid-template-columns: 60px 60px;
+  }
+}

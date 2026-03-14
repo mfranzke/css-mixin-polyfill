@@ -1,0 +1,10 @@
+body {
+	@media (width <= 800px) {
+		display: flex;
+		flex-flow: column;
+	}
+	@media (width > 800px) {
+		display: grid;
+		grid-template-columns: 60px 60px;
+	}
+}
