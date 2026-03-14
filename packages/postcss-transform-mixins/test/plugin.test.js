@@ -7,14 +7,14 @@ import {
 	normalizeCSS,
 	postcssFixtureTests
 } from '../../../test/scripts/fixture-utils.js';
-import { postcssIfFunction } from '../src/index.js';
+import { postcssMixinMacro } from '../src/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURES_DIR = path.join(__dirname, '../../../test/fixtures');
 
 describe('postcss-transform-mixins plugin', () => {
 	async function run(input, output, options = {}) {
-		const result = await postcss([postcssIfFunction(options)]).process(
+		const result = await postcss([postcssMixinMacro(options)]).process(
 			input,
 			{
 				from: undefined
@@ -33,7 +33,7 @@ describe('postcss-transform-mixins plugin', () => {
 	}
 
 	it('should work with logTransformations option', async () => {
-		const { input, expected } = loadFixture('basic-media');
+		const { input, expected } = loadFixture('macro.simple');
 
 		// Spy on console.log
 		const logSpy = vi.spyOn(console, 'log');
@@ -52,26 +52,22 @@ describe('postcss-transform-mixins plugin', () => {
 		logSpy.mockRestore();
 	});
 
-	it('should handle malformed CSS gracefully', async () => {
-		const input = `
-.broken {
-  color: if(media(invalid-query): blue; else: red);
-}`;
+	it('should pass through CSS without @mixin/@macro/@apply', async () => {
+		const input = '.normal { color: blue; font-size: 14px; }';
 
-		// Should not throw an error, but may not transform properly
-		const result = await postcss([postcssIfFunction()]).process(input, {
+		const result = await postcss([postcssMixinMacro()]).process(input, {
 			from: undefined
 		});
 
-		expect(result.css).toBeDefined();
+		expect(result.css).toBe(input);
 	});
 
 	it('should properly forward the from option when processing files', async () => {
-		const { input, expected } = loadFixture('basic-media');
-		const inputPath = path.join(FIXTURES_DIR, 'basic-media.input.css');
+		const { input, expected } = loadFixture('macro.simple');
+		const inputPath = path.join(FIXTURES_DIR, 'macro.simple.input.css');
 
 		// Process with actual file path
-		const result = await postcss([postcssIfFunction()]).process(input, {
+		const result = await postcss([postcssMixinMacro()]).process(input, {
 			from: inputPath
 		});
 
