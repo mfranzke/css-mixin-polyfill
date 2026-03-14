@@ -10,10 +10,14 @@ To modify a test case, edit the corresponding fixture files directly — do not 
 
 Fixtures follow the pattern:
 
+<!-- markdownlint-disable MD040 -->
+
 ```
 test/fixtures/<category>.<name>.input.css
 test/fixtures/<category>.<name>.expected.css
 ```
+
+<!-- markdownlint-enable MD040 -->
 
 | Category | Description                                                   |
 | -------- | ------------------------------------------------------------- |
