@@ -35,8 +35,6 @@ const { init } = require("css-mixin-polyfill");
 init();
 ```
 
----
-
 ## API Reference
 
 ### Core Polyfill (`css-mixin-polyfill`)
