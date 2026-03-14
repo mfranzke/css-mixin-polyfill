@@ -36,9 +36,9 @@
     "postcss",
     "postcss-plugin",
     "css",
-    "if",
-    "media-query",
-    "supports",
+    "mixin",
+    "macro",
+    "apply",
     "transform"
   ],
   "scripts": {

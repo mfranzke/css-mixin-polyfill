@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 /**
- * CSS mixinBuild-time Transformation CLI
- * Transforms CSS mixins to native @media/@supports rules
+ * CSS Mixin/Macro Build-time Transformation CLI
+ * Transforms CSS @mixin/@macro/@apply rules into native CSS
  */
 
 import { readFile, writeFile } from 'node:fs/promises';
@@ -11,7 +11,7 @@ import process from 'node:process';
 import { buildTimeTransform } from '../dist/index.modern.js';
 
 const help = `
-CSS mixinBuild-time Transformation CLI
+CSS Mixin/Macro Build-time Transformation CLI
 
 Usage:
   npx css-mixin-polyfill <input.css> [output.css] [options]
@@ -71,30 +71,14 @@ const main = async () => {
 			console.log('\n📊 Transformation Statistics:');
 			console.log(`  Total rules processed: ${result.stats.totalRules}`);
 			console.log(
-				`  Rules with CSS mixintransformed: ${result.stats.transformedRules}`
+				`  @apply rules transformed: ${result.stats.transformedRules}`
 			);
 			console.log(
-				`  Has runtime rules: ${result.hasRuntimeRules ? 'Yes' : 'No'}`
+				'  ✅ All @mixin/@macro rules transformed to native CSS'
 			);
-
-			if (result.hasRuntimeRules) {
-				console.log(
-					'  ⚠️  Some mixins require runtime processing'
-				);
-			} else {
-				console.log(
-					'  ✅ All mixins transformed to native CSS'
-				);
-			}
 		}
 
-		// Combine native CSS with any remaining runtime CSS
-		let finalCSS = result.nativeCSS;
-		if (result.hasRuntimeRules && result.runtimeCSS) {
-			finalCSS +=
-				'\n\n/* Runtime-processed rules (require polyfill) */\n' +
-				result.runtimeCSS;
-		}
+		const finalCSS = result.nativeCSS;
 
 		// Output result
 		if (outputFile) {
@@ -110,16 +94,6 @@ const main = async () => {
 			console.log('\n📄 Transformed CSS:');
 			console.log('─'.repeat(50));
 			console.log(finalCSS);
-		}
-
-		// Show warnings if needed
-		if (result.hasRuntimeRules) {
-			console.log(
-				'\n⚠️  Warning: Some mixins still require runtime processing.'
-			);
-			console.log(
-				'   Make sure to include the CSS cssmixinmacropolyfill in your webpage.'
-			);
 		}
 	} catch (error) {
 		console.error('❌ Error:', error.message);

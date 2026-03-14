@@ -23,15 +23,15 @@ export type PluginOptions = {
  * @property {string[]} [skipSelectors=[]] - Array of selectors to skip transformation for
  */
 /**
- * Creates the PostCSS CSS mixinplugin
+ * Creates the PostCSS CSS mixin/macro plugin
  * @param {PluginOptions} [options={}] - Plugin configuration options
  * @returns {Object} PostCSS plugin
  */
-export function postcssIfFunction(
+export function postcssMixinMacro(
 	options?: PluginOptions
 ): Record<string, unknown>;
-export namespace postcssIfFunction {
+export namespace postcssMixinMacro {
 	const postcss: boolean;
 }
 
-export default postcssIfFunction;
+export default postcssMixinMacro;

@@ -6,17 +6,16 @@ export { buildTimeTransform } from './transform.js';
 export function init(options?: Record<string, unknown>): void;
 
 /**
- * Process CSS text manually
+ * Process CSS text containing @mixin/@macro/@apply rules
  */
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function processCSSText(
-	cssText: any,
-	options?: Record<string, unknown>,
-	element?: undefined
-): any;
+	cssText: string,
+	options?: Record<string, unknown>
+): string;
 
 /**
- * Check if browser has native CSS mixin or macro support
+ * Check if browser has native CSS @mixin/@macro support
  */
 export function hasNativeSupport(): boolean;
 
@@ -24,8 +23,3 @@ export function hasNativeSupport(): boolean;
  * Public API to manually trigger processing
  */
 export function refresh(): void;
-
-/**
- * Clean up media query listeners
- */
-export function cleanupMediaQueryListeners(): void;

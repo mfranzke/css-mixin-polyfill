@@ -139,7 +139,7 @@ function generateFixtureList() {
 }
 
 // Main execution
-console.log('🔧 CSS cssMixinMacroPolyfill Documentation Builder\n');
+console.log('🔧 CSS Mixin and Macro Polyfill Documentation Builder\n');
 
 try {
 	generateFixtureList();
