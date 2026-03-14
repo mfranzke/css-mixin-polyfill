@@ -1,6 +1,6 @@
 # GitHub Actions Workflows Documentation
 
-This document describes all the GitHub Actions workflows and configurations set up for the CSS cssMixinMacroPolyfill project.
+This document describes all the GitHub Actions workflows and configurations set up for the CSS Mixin and Macro Polyfill project.
 
 ## Workflows Overview
 
