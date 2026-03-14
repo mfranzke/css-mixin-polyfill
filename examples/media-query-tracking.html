@@ -1,389 +1,404 @@
 <!doctype html>
 <html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>CSS Mixin/Macro Polyfill - Parameter Variations</title>
+		<!-- Favicon for older Browsers -->
+		<link rel="icon" type="image/x-icon" href="../favicon.ico" />
+		<!-- SVG-Favicon for modern browsers -->
+		<link rel="icon" type="image/svg+xml" href="../favicon.svg" />
 
-<head>
-	<meta charset="UTF-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>CSS Mixin/Macro Polyfill - Parameter Variations</title>
-	<!-- Favicon for older Browsers -->
-	<link rel="icon" type="image/x-icon" href="../favicon.ico" />
-	<!-- SVG-Favicon for modern browsers -->
-	<link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+		<!-- PNG-Favicons for High-DPI (Retina) Displays -->
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="32x32"
+			href="../favicon-32x32.png"
+		/>
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="16x16"
+			href="../favicon-16x16.png"
+		/>
+		<style>
+			body {
+				font-family:
+					system-ui,
+					-apple-system,
+					sans-serif;
+				margin: 0;
+				padding: 20px;
+				background-color: #f5f5f5;
+				min-height: 100vh;
+			}
 
-	<!-- PNG-Favicons for High-DPI (Retina) Displays -->
-	<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
-	<link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
-	<style>
-		body {
-			font-family:
-				system-ui,
-				-apple-system,
-				sans-serif;
-			margin: 0;
-			padding: 20px;
-			background-color: #f5f5f5;
-			min-height: 100vh;
-		}
+			.demo-container {
+				max-width: 1200px;
+				margin: 0 auto;
+				padding: 20px;
+			}
 
-		.demo-container {
-			max-width: 1200px;
-			margin: 0 auto;
-			padding: 20px;
-		}
+			h1 {
+				text-align: center;
+				color: #333;
+				margin-bottom: 10px;
+			}
 
-		h1 {
-			text-align: center;
-			color: #333;
-			margin-bottom: 10px;
-		}
+			.subtitle {
+				text-align: center;
+				font-size: 18px;
+				color: #666;
+				margin-bottom: 40px;
+			}
 
-		.subtitle {
-			text-align: center;
-			font-size: 18px;
-			color: #666;
-			margin-bottom: 40px;
-		}
+			.info {
+				background: #e3f2fd;
+				padding: 20px;
+				border-radius: 10px;
+				margin-bottom: 30px;
+				border-left: 5px solid #007acc;
+			}
 
-		.info {
-			background: #e3f2fd;
-			padding: 20px;
-			border-radius: 10px;
-			margin-bottom: 30px;
-			border-left: 5px solid #007acc;
-		}
+			.info h2 {
+				color: #007acc;
+				margin-top: 0;
+			}
 
-		.info h2 {
-			color: #007acc;
-			margin-top: 0;
-		}
+			.code-block {
+				background: #2d3748;
+				color: #e2e8f0;
+				padding: 20px;
+				border-radius: 10px;
+				font-family: "Courier New", monospace;
+				margin: 15px 0;
+				overflow-x: auto;
+				white-space: pre-wrap;
+				font-size: 14px;
+			}
 
-		.code-block {
-			background: #2d3748;
-			color: #e2e8f0;
-			padding: 20px;
-			border-radius: 10px;
-			font-family: "Courier New", monospace;
-			margin: 15px 0;
-			overflow-x: auto;
-			white-space: pre-wrap;
-			font-size: 14px;
-		}
+			.demo-row {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+				gap: 20px;
+				margin: 20px 0;
+			}
 
-		.demo-row {
-			display: grid;
-			grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-			gap: 20px;
-			margin: 20px 0;
-		}
+			.demo-label {
+				font-size: 14px;
+				color: #666;
+				margin-bottom: 5px;
+				font-style: italic;
+			}
 
-		.demo-label {
-			font-size: 14px;
-			color: #666;
-			margin-bottom: 5px;
-			font-style: italic;
-		}
-
-		/* =============================================
+			/* =============================================
 		   Mixin Definitions — One Mixin, Many Variations
 		   ============================================= */
 
-		/* A single mixin applied with different parameters */
-		@mixin --colored-card(--bg <color>: lightblue,
-			--text <color>: black,
-			--border-color <color>: darkblue,
-			--radius: 8px) {
-			@result {
-				background-color: var(--bg);
-				color: var(--text);
-				border: 2px solid var(--border-color);
-				border-radius: var(--radius);
-				padding: 20px;
-				margin: 0;
-				font-size: 16px;
+			/* A single mixin applied with different parameters */
+			@mixin --colored-card(
+				--bg <color>: lightblue,
+				--text <color>: black,
+				--border-color <color>: darkblue,
+				--radius: 8px
+			) {
+				@result {
+					background-color: var(--bg);
+					color: var(--text);
+					border: 2px solid var(--border-color);
+					border-radius: var(--radius);
+					padding: 20px;
+					margin: 0;
+					font-size: 16px;
+				}
 			}
-		}
 
-		/* A button mixin with size and color parameters */
-		@mixin --button-style(--bg <color>: #007acc,
-			--text <color>: white,
-			--size: 16px,
-			--padding: 12px 24px,
-			--radius: 6px) {
-			@result {
-				background-color: var(--bg);
-				color: var(--text);
-				font-size: var(--size);
-				padding: var(--padding);
-				border: none;
-				border-radius: var(--radius);
-				cursor: pointer;
-				font-weight: 600;
-				transition: opacity 0.2s ease;
+			/* A button mixin with size and color parameters */
+			@mixin --button-style(
+				--bg <color>: #007acc,
+				--text <color>: white,
+				--size: 16px,
+				--padding: 12px 24px,
+				--radius: 6px
+			) {
+				@result {
+					background-color: var(--bg);
+					color: var(--text);
+					font-size: var(--size);
+					padding: var(--padding);
+					border: none;
+					border-radius: var(--radius);
+					cursor: pointer;
+					font-weight: 600;
+					transition: opacity 0.2s ease;
+				}
 			}
-		}
 
-		/* A spacing mixin with configurable dimensions */
-		@mixin --spaced-box(--vertical: 20px,
-			--horizontal: 20px,
-			--bg: #f0f0f0) {
-			@result {
-				padding: var(--vertical) var(--horizontal);
-				background: var(--bg);
-				border-radius: 8px;
-				margin: 10px 0;
+			/* A spacing mixin with configurable dimensions */
+			@mixin --spaced-box(
+				--vertical: 20px,
+				--horizontal: 20px,
+				--bg: #f0f0f0
+			) {
+				@result {
+					padding: var(--vertical) var(--horizontal);
+					background: var(--bg);
+					border-radius: 8px;
+					margin: 10px 0;
+				}
 			}
-		}
 
-		/* A shadow mixin with configurable intensity */
-		@mixin --shadow-card(--blur: 10px, --spread: 0, --opacity: 0.1) {
-			@result {
-				background: white;
-				padding: 20px;
-				border-radius: 12px;
-				box-shadow: 0 4px var(--blur) var(--spread) rgba(0, 0, 0, var(--opacity));
+			/* A shadow mixin with configurable intensity */
+			@mixin --shadow-card(--blur: 10px, --spread: 0, --opacity: 0.1) {
+				@result {
+					background: white;
+					padding: 20px;
+					border-radius: 12px;
+					box-shadow: 0 4px var(--blur) var(--spread)
+						rgba(0, 0, 0, var(--opacity));
+				}
 			}
-		}
 
-		/* =============================================
+			/* =============================================
 		   Same Mixin, Different Parameters
 		   ============================================= */
 
-		/* Colored card variations */
-		.card-blue {
-			@apply --colored-card(lightblue, darkblue, darkblue, 8px);
-		}
+			/* Colored card variations */
+			.card-blue {
+				@apply --colored-card(lightblue, darkblue, darkblue, 8px);
+			}
 
-		.card-coral {
-			@apply --colored-card(lightcoral, darkred, darkred, 8px);
-		}
+			.card-coral {
+				@apply --colored-card(lightcoral, darkred, darkred, 8px);
+			}
 
-		.card-green {
-			@apply --colored-card(lightgreen, darkgreen, darkgreen, 8px);
-		}
+			.card-green {
+				@apply --colored-card(lightgreen, darkgreen, darkgreen, 8px);
+			}
 
-		.card-gold {
-			@apply --colored-card(#fff8dc, #8b6914, #daa520, 16px);
-		}
+			.card-gold {
+				@apply --colored-card(#fff8dc, #8b6914, #daa520, 16px);
+			}
 
-		/* Button variations */
-		.button-primary {
-			@apply --button-style(#007acc, white, 16px, 12px 24px, 6px);
-		}
+			/* Button variations */
+			.button-primary {
+				@apply --button-style(#007acc, white, 16px, 12px 24px, 6px);
+			}
 
-		.button-danger {
-			@apply --button-style(#dc3545, white, 16px, 12px 24px, 6px);
-		}
+			.button-danger {
+				@apply --button-style(#dc3545, white, 16px, 12px 24px, 6px);
+			}
 
-		.button-success {
-			@apply --button-style(#28a745, white, 16px, 12px 24px, 6px);
-		}
+			.button-success {
+				@apply --button-style(#28a745, white, 16px, 12px 24px, 6px);
+			}
 
-		.button-large {
-			@apply --button-style(#6f42c1, white, 20px, 16px 32px, 10px);
-		}
+			.button-large {
+				@apply --button-style(#6f42c1, white, 20px, 16px 32px, 10px);
+			}
 
-		.button-small {
-			@apply --button-style(#fd7e14, white, 12px, 6px 12px, 4px);
-		}
+			.button-small {
+				@apply --button-style(#fd7e14, white, 12px, 6px 12px, 4px);
+			}
 
-		.button-pill {
-			@apply --button-style(#20c997, white, 14px, 10px 28px, 50px);
-		}
+			.button-pill {
+				@apply --button-style(#20c997, white, 14px, 10px 28px, 50px);
+			}
 
-		/* Spacing variations */
-		.box-compact {
-			@apply --spaced-box(10px, 10px, #e3f2fd);
-		}
+			/* Spacing variations */
+			.box-compact {
+				@apply --spaced-box(10px, 10px, #e3f2fd);
+			}
 
-		.box-normal {
-			@apply --spaced-box(20px, 20px, #e8f5e9);
-		}
+			.box-normal {
+				@apply --spaced-box(20px, 20px, #e8f5e9);
+			}
 
-		.box-spacious {
-			@apply --spaced-box(40px, 40px, #fff3e0);
-		}
+			.box-spacious {
+				@apply --spaced-box(40px, 40px, #fff3e0);
+			}
 
-		/* Shadow variations */
-		.shadow-subtle {
-			@apply --shadow-card(6px, 0, 0.05);
-		}
+			/* Shadow variations */
+			.shadow-subtle {
+				@apply --shadow-card(6px, 0, 0.05);
+			}
 
-		.shadow-medium {
-			@apply --shadow-card(15px, 0, 0.12);
-		}
+			.shadow-medium {
+				@apply --shadow-card(15px, 0, 0.12);
+			}
 
-		.shadow-dramatic {
-			@apply --shadow-card(30px, 5px, 0.25);
-		}
+			.shadow-dramatic {
+				@apply --shadow-card(30px, 5px, 0.25);
+			}
 
-		.button-primary:hover,
-		.button-danger:hover,
-		.button-success:hover,
-		.button-large:hover,
-		.button-small:hover,
-		.button-pill:hover {
-			opacity: 0.85;
-		}
-	</style>
-</head>
+			.button-primary:hover,
+			.button-danger:hover,
+			.button-success:hover,
+			.button-large:hover,
+			.button-small:hover,
+			.button-pill:hover {
+				opacity: 0.85;
+			}
+		</style>
+	</head>
 
-<body>
-	<div class="demo-container">
-		<h1>CSS Mixin/Macro Polyfill - Parameter Variations</h1>
-		<p class="subtitle">
-			One @mixin definition, many @apply invocations with different
-			parameters
-		</p>
-
-		<div class="info">
-			<h2>How parameter variations work</h2>
-			<p>
-				A single <code>@mixin</code> can accept parameters that
-				change the resulting styles. By invoking
-				<code>@apply</code> with different argument values, you
-				create distinct visual variations from one reusable
-				definition.
+	<body>
+		<div class="demo-container">
+			<h1>CSS Mixin/Macro Polyfill - Parameter Variations</h1>
+			<p class="subtitle">
+				One @mixin definition, many @apply invocations with different
+				parameters
 			</p>
-		</div>
 
-		<div class="info">
-			<h2>1. Colored Card Variations</h2>
-			<div class="code-block">
-				@mixin --colored-card(--bg &lt;color&gt;: lightblue, --text
-				&lt;color&gt;: black, --border-color &lt;color&gt;:
-				darkblue) { @result { background-color: var(--bg); color:
-				var(--text); border: 2px solid var(--border-color); } }
-				.card-blue { @apply --colored-card(lightblue, darkblue,
-				darkblue); } .card-coral { @apply --colored-card(lightcoral,
-				darkred, darkred); } .card-green { @apply
-				--colored-card(lightgreen, darkgreen, darkgreen); }
-				.card-gold { @apply --colored-card(#fff8dc, #8b6914,
-				#daa520, 16px); }
+			<div class="info">
+				<h2>How parameter variations work</h2>
+				<p>
+					A single <code>@mixin</code> can accept parameters that
+					change the resulting styles. By invoking
+					<code>@apply</code> with different argument values, you
+					create distinct visual variations from one reusable
+					definition.
+				</p>
 			</div>
-			<div class="demo-row">
-				<div>
-					<div class="demo-label">
-						@apply --colored-card(lightblue, ...)
+
+			<div class="info">
+				<h2>1. Colored Card Variations</h2>
+				<div class="code-block">
+					@mixin --colored-card(--bg &lt;color&gt;: lightblue, --text
+					&lt;color&gt;: black, --border-color &lt;color&gt;:
+					darkblue) { @result { background-color: var(--bg); color:
+					var(--text); border: 2px solid var(--border-color); } }
+					.card-blue { @apply --colored-card(lightblue, darkblue,
+					darkblue); } .card-coral { @apply --colored-card(lightcoral,
+					darkred, darkred); } .card-green { @apply
+					--colored-card(lightgreen, darkgreen, darkgreen); }
+					.card-gold { @apply --colored-card(#fff8dc, #8b6914,
+					#daa520, 16px); }
+				</div>
+				<div class="demo-row">
+					<div>
+						<div class="demo-label">
+							@apply --colored-card(lightblue, ...)
+						</div>
+						<div class="card-blue">Blue card</div>
 					</div>
-					<div class="card-blue">Blue card</div>
-				</div>
-				<div>
-					<div class="demo-label">
-						@apply --colored-card(lightcoral, ...)
+					<div>
+						<div class="demo-label">
+							@apply --colored-card(lightcoral, ...)
+						</div>
+						<div class="card-coral">Coral card</div>
 					</div>
-					<div class="card-coral">Coral card</div>
-				</div>
-				<div>
-					<div class="demo-label">
-						@apply --colored-card(lightgreen, ...)
+					<div>
+						<div class="demo-label">
+							@apply --colored-card(lightgreen, ...)
+						</div>
+						<div class="card-green">Green card</div>
 					</div>
-					<div class="card-green">Green card</div>
-				</div>
-				<div>
-					<div class="demo-label">
-						@apply --colored-card(#fff8dc, ..., 16px)
+					<div>
+						<div class="demo-label">
+							@apply --colored-card(#fff8dc, ..., 16px)
+						</div>
+						<div class="card-gold">Gold card (extra rounded)</div>
 					</div>
-					<div class="card-gold">Gold card (extra rounded)</div>
+				</div>
+			</div>
+
+			<div class="info">
+				<h2>2. Button Style Variations</h2>
+				<div class="code-block">
+					@mixin --button-style(--bg &lt;color&gt;: #007acc, --text
+					&lt;color&gt;: white, --size: 16px, --padding: 12px 24px,
+					--radius: 6px) { @result { background-color: var(--bg);
+					color: var(--text); font-size: var(--size); padding:
+					var(--padding); border-radius: var(--radius); } }
+					.button-primary { @apply --button-style(#007acc, white); }
+					.button-danger { @apply --button-style(#dc3545, white); }
+					.button-pill { @apply --button-style(#20c997, white, 14px,
+					10px 28px, 50px); }
+				</div>
+				<div class="demo-row">
+					<div>
+						<div class="demo-label">Primary</div>
+						<button class="button-primary">Primary</button>
+					</div>
+					<div>
+						<div class="demo-label">Danger</div>
+						<button class="button-danger">Danger</button>
+					</div>
+					<div>
+						<div class="demo-label">Success</div>
+						<button class="button-success">Success</button>
+					</div>
+					<div>
+						<div class="demo-label">Large / Purple</div>
+						<button class="button-large">Large</button>
+					</div>
+					<div>
+						<div class="demo-label">Small / Orange</div>
+						<button class="button-small">Small</button>
+					</div>
+					<div>
+						<div class="demo-label">Pill / Teal</div>
+						<button class="button-pill">Pill</button>
+					</div>
+				</div>
+			</div>
+
+			<div class="info">
+				<h2>3. Spacing Variations</h2>
+				<div class="code-block">
+					@mixin --spaced-box(--vertical: 20px, --horizontal: 20px,
+					--bg: #f0f0f0) { @result { padding: var(--vertical)
+					var(--horizontal); background: var(--bg); } } .box-compact {
+					@apply --spaced-box(10px, 10px, #e3f2fd); } .box-normal {
+					@apply --spaced-box(20px, 20px, #e8f5e9); } .box-spacious {
+					@apply --spaced-box(40px, 40px, #fff3e0); }
+				</div>
+				<div class="box-compact">Compact spacing (10px)</div>
+				<div class="box-normal">Normal spacing (20px)</div>
+				<div class="box-spacious">Spacious spacing (40px)</div>
+			</div>
+
+			<div class="info">
+				<h2>4. Shadow Intensity Variations</h2>
+				<div class="code-block">
+					@mixin --shadow-card(--blur: 10px, --spread: 0, --opacity:
+					0.1) { @result { box-shadow: 0 4px var(--blur) var(--spread)
+					rgba(0, 0, 0, var(--opacity)); } } .shadow-subtle { @apply
+					--shadow-card(6px, 0, 0.05); } .shadow-medium { @apply
+					--shadow-card(15px, 0, 0.12); } .shadow-dramatic { @apply
+					--shadow-card(30px, 5px, 0.25); }
+				</div>
+				<div class="demo-row">
+					<div>
+						<div class="demo-label">Subtle shadow</div>
+						<div class="shadow-subtle">Subtle</div>
+					</div>
+					<div>
+						<div class="demo-label">Medium shadow</div>
+						<div class="shadow-medium">Medium</div>
+					</div>
+					<div>
+						<div class="demo-label">Dramatic shadow</div>
+						<div class="shadow-dramatic">Dramatic</div>
+					</div>
 				</div>
 			</div>
 		</div>
 
-		<div class="info">
-			<h2>2. Button Style Variations</h2>
-			<div class="code-block">
-				@mixin --button-style(--bg &lt;color&gt;: #007acc, --text
-				&lt;color&gt;: white, --size: 16px, --padding: 12px 24px,
-				--radius: 6px) { @result { background-color: var(--bg);
-				color: var(--text); font-size: var(--size); padding:
-				var(--padding); border-radius: var(--radius); } }
-				.button-primary { @apply --button-style(#007acc, white); }
-				.button-danger { @apply --button-style(#dc3545, white); }
-				.button-pill { @apply --button-style(#20c997, white, 14px,
-				10px 28px, 50px); }
-			</div>
-			<div class="demo-row">
-				<div>
-					<div class="demo-label">Primary</div>
-					<button class="button-primary">Primary</button>
-				</div>
-				<div>
-					<div class="demo-label">Danger</div>
-					<button class="button-danger">Danger</button>
-				</div>
-				<div>
-					<div class="demo-label">Success</div>
-					<button class="button-success">Success</button>
-				</div>
-				<div>
-					<div class="demo-label">Large / Purple</div>
-					<button class="button-large">Large</button>
-				</div>
-				<div>
-					<div class="demo-label">Small / Orange</div>
-					<button class="button-small">Small</button>
-				</div>
-				<div>
-					<div class="demo-label">Pill / Teal</div>
-					<button class="button-pill">Pill</button>
-				</div>
-			</div>
-		</div>
+		<script type="module">
+			import { init } from "../packages/css-mixin-polyfill/dist/index.umd.js";
 
-		<div class="info">
-			<h2>3. Spacing Variations</h2>
-			<div class="code-block">
-				@mixin --spaced-box(--vertical: 20px, --horizontal: 20px,
-				--bg: #f0f0f0) { @result { padding: var(--vertical)
-				var(--horizontal); background: var(--bg); } } .box-compact {
-				@apply --spaced-box(10px, 10px, #e3f2fd); } .box-normal {
-				@apply --spaced-box(20px, 20px, #e8f5e9); } .box-spacious {
-				@apply --spaced-box(40px, 40px, #fff3e0); }
-			</div>
-			<div class="box-compact">Compact spacing (10px)</div>
-			<div class="box-normal">Normal spacing (20px)</div>
-			<div class="box-spacious">Spacious spacing (40px)</div>
-		</div>
+			// Enable debug logging to see what's happening
+			init({ debug: true });
 
-		<div class="info">
-			<h2>4. Shadow Intensity Variations</h2>
-			<div class="code-block">
-				@mixin --shadow-card(--blur: 10px, --spread: 0, --opacity:
-				0.1) { @result { box-shadow: 0 4px var(--blur) var(--spread)
-				rgba(0, 0, 0, var(--opacity)); } } .shadow-subtle { @apply
-				--shadow-card(6px, 0, 0.05); } .shadow-medium { @apply
-				--shadow-card(15px, 0, 0.12); } .shadow-dramatic { @apply
-				--shadow-card(30px, 5px, 0.25); }
-			</div>
-			<div class="demo-row">
-				<div>
-					<div class="demo-label">Subtle shadow</div>
-					<div class="shadow-subtle">Subtle</div>
-				</div>
-				<div>
-					<div class="demo-label">Medium shadow</div>
-					<div class="shadow-medium">Medium</div>
-				</div>
-				<div>
-					<div class="demo-label">Dramatic shadow</div>
-					<div class="shadow-dramatic">Dramatic</div>
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<script type="module">
-		import { init } from "../packages/css-mixin-polyfill/dist/index.umd.js";
-
-		// Enable debug logging to see what's happening
-		init({ debug: true });
-
-		console.log(
-			"CSS Mixin/Macro Polyfill — Parameter Variations demo active!"
-		);
-		console.log(
-			"Same @mixin, different @apply arguments = different visual results."
-		);
-	</script>
-</body>
-
+			console.log(
+				"CSS Mixin/Macro Polyfill — Parameter Variations demo active!"
+			);
+			console.log(
+				"Same @mixin, different @apply arguments = different visual results."
+			);
+		</script>
+	</body>
 </html>
