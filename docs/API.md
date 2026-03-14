@@ -31,6 +31,7 @@ init();
 ```javascript
 const { init } = require("css-mixin-polyfill");
 
+// Initialize the polyfill
 init();
 ```
 
