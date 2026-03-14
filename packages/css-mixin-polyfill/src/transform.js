@@ -567,7 +567,7 @@ const substituteParams = (body, params, args) => {
 			// Replace var(--paramName) with the argument value
 			// Handle var(--paramName) and var(--paramName, fallback)
 			const varPattern = new RegExp(
-				`var\\(\\s*${param.name.replace('--', '--')}\\s*(?:,[^)]*)?\\)`,
+				`var\\(\\s*${param.name}\\s*(?:,[^)]*)?\\)`,
 				'g'
 			);
 			result = result.replace(varPattern, argValue);
