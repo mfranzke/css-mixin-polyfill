@@ -39,6 +39,7 @@
     "mixin",
     "macro",
     "apply",
+    "css",
     "transform"
   ],
   "scripts": {
