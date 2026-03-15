@@ -8,6 +8,10 @@ A [PostCSS](https://postcss.org/) plugin for transforming [CSS `@mixin`, `@macro
 
 This plugin is part of the [css-mixin-polyfill](https://github.com/mfranzke/css-mixin-polyfill/tree/main/packages/css-mixin-polyfill/) project and provides build-time processing of CSS mixin and macro definitions, substituting `@apply` rules with the corresponding resolved styles — eliminating the need for runtime JavaScript processing.
 
+<!-- FIXTURE: macro.basic -->
+
+<!-- Note: This content is automatically generated from test fixtures. Do not edit the code blocks directly - they will be overwritten during the build process. To modify test cases, edit the corresponding .input.css and .expected.css files in the test/fixtures/ directory -->
+
 **Input CSS:**
 
 ```css
@@ -32,6 +36,7 @@ This plugin is part of the [css-mixin-polyfill](https://github.com/mfranzke/css-
 }
 ```
 
+<!-- /FIXTURE -->
 ## Installation
 
 ```bash
@@ -198,6 +203,10 @@ module.exports = {
 
 Macros provide simple, literal substitution of a block of styles at each `@apply` site.
 
+<!-- FIXTURE: macro.basic -->
+
+<!-- Note: This content is automatically generated from test fixtures. Do not edit the code blocks directly - they will be overwritten during the build process. To modify test cases, edit the corresponding .input.css and .expected.css files in the test/fixtures/ directory -->
+
 **Input CSS:**
 
 ```css
@@ -221,6 +230,8 @@ Macros provide simple, literal substitution of a block of styles at each `@apply
 	list-style: none;
 }
 ```
+
+<!-- /FIXTURE -->
 
 ### Mixins
 
@@ -270,6 +281,10 @@ h1 {
 
 Macros (and mixins) can accept a contents block via `@contents`, allowing callers to inject styles into a predefined structure.
 
+<!-- FIXTURE: macro.contents -->
+
+<!-- Note: This content is automatically generated from test fixtures. Do not edit the code blocks directly - they will be overwritten during the build process. To modify test cases, edit the corresponding .input.css and .expected.css files in the test/fixtures/ directory -->
+
 **Input CSS:**
 
 ```css
@@ -298,6 +313,7 @@ body {
 }
 ```
 
+<!-- /FIXTURE -->
 ## Limitations
 
 - **Static Analysis Only**: The plugin performs static analysis at build time and cannot handle dynamically generated CSS or runtime-dependent values
