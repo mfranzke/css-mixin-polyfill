@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>CSS cssMixinMacroPolyfill - Examples</title>
+		<title>CSS Mixin and Macro Polyfill - Examples</title>
 		<!-- Favicon for older Browsers -->
 		<link rel="icon" type="image/x-icon" href="favicon.ico" />
 		<!-- SVG-Favicon for modern browsers -->
@@ -72,12 +72,12 @@
 	</head>
 
 	<body>
-		<h1>CSS cssMixinMacroPolyfill - Live Examples</h1>
+		<h1>CSS Mixin and Macro Polyfill - Live Examples</h1>
 
 		<p>
-			This page showcases live examples of the CSS cssmixinmacropolyfill
-			in action. Each example demonstrates different aspects of the
-			polyfill's functionality.
+			This page showcases live examples of the CSS Mixin and Macro
+			Polyfill in action. Each example demonstrates different aspects of
+			the polyfill's functionality.
 		</p>
 
 		<div class="cdn-info">
@@ -93,36 +93,40 @@
 			<li>
 				<a href="examples/basic-examples.html">Basic Examples</a>
 				<br /><small
-					>Demonstrates basic CSS mixinsyntax with style(), media(),
-					and supports() conditions</small
+					>Demonstrates basic @macro and @mixin definitions with
+					@apply substitution</small
 				>
 			</li>
 			<li>
 				<a href="examples/enhanced.html">Enhanced Features</a>
 				<br /><small
-					>Shows advanced usage patterns and edge cases</small
+					>Shows advanced usage patterns including @contents and
+					nested @apply</small
 				>
 			</li>
 			<li>
 				<a href="examples/multiple-conditions.html"
-					>Multiple Conditions</a
+					>Multiple @apply Rules</a
 				>
 				<br /><small
-					>Examples with multiple conditions within a single if()
-					function</small
+					>Examples composing multiple @apply rules within a single
+					selector</small
 				>
 			</li>
 			<li>
 				<a href="examples/advanced.html">Advanced Usage</a>
-				<br /><small>Complex scenarios and real-world use cases</small>
+				<br /><small
+					>Complex scenarios with parameter types, defaults, and
+					@contents fallbacks</small
+				>
 			</li>
 			<li>
 				<a href="examples/media-query-tracking.html"
-					>Media Query Tracking</a
+					>Parameter Variations</a
 				>
 				<br /><small
-					>Demonstrates automatic media query change detection and
-					responsive updates</small
+					>Demonstrates how different parameter values create varied
+					styles from a single mixin</small
 				>
 			</li>
 		</ul>

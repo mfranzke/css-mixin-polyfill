@@ -4,32 +4,35 @@
 [![npm version](https://badge.fury.io/js/postcss-transform-mixins.svg)](https://badge.fury.io/js/postcss-transform-mixins)
 [![Build Status](https://github.com/mfranzke/css-mixin-polyfill/workflows/CI/badge.svg)](https://github.com/mfranzke/css-mixin-polyfill/actions)
 
-A [PostCSS](https://postcss.org/) plugin for transforming [CSS `if()` functions](https://developer.mozilla.org/en-US/docs/Web/CSS/if) into native CSS `@media` and `@supports` rules at build time.
+A [PostCSS](https://postcss.org/) plugin for transforming [CSS `@mixin`, `@macro`, and `@apply` rules](https://drafts.csswg.org/css-mixins/) at build time.
 
-This plugin is part of the [css-mixin-polyfill](https://github.com/mfranzke/css-mixin-polyfill/tree/main/packages/css-mixin-polyfill/) project and provides build-time transformation of conditional CSS, eliminating the need for runtime JavaScript processing when using only `media()` and `supports()` functions.
+This plugin is part of the [css-mixin-polyfill](https://github.com/mfranzke/css-mixin-polyfill/tree/main/packages/css-mixin-polyfill/) project and provides build-time processing of CSS mixin and macro definitions, substituting `@apply` rules with the corresponding resolved styles — eliminating the need for runtime JavaScript processing.
 
-<!-- FIXTURE: basic-media -->
+<!-- FIXTURE: macro.basic -->
 
 <!-- Note: This content is automatically generated from test fixtures. Do not edit the code blocks directly - they will be overwritten during the build process. To modify test cases, edit the corresponding .input.css and .expected.css files in the test/fixtures/ directory -->
 
 **Input CSS:**
 
 ```css
-.responsive {
-	width: if(media(width <= 768px): 100%; else: 50%);
+@macro --reset-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.nav {
+	@apply --reset-list;
 }
 ```
 
 **Expected Output:**
 
 ```css
-.responsive {
-	width: 50%;
-}
-@media (width <= 768px) {
-	.responsive {
-		width: 100%;
-	}
+.nav {
+	margin: 0;
+	padding: 0;
+	list-style: none;
 }
 ```
 
@@ -58,20 +61,25 @@ npx postcss input.css --output output.css --config postcss.config.js
 ```js
 // Named export (recommended)
 import postcss from "postcss";
-import { postcssIfFunction } from "postcss-transform-mixins";
+import { postcssMixinMacro } from "postcss-transform-mixins";
 
 // Or default export (for compatibility)
 import postcss from "postcss";
-import postcssIfFunction from "postcss-transform-mixins";
+import postcssMixinMacro from "postcss-transform-mixins";
 
 const css = `
-.example {
-  color: if(media(max-width: 768px): blue; else: red);
-  font-size: if(supports(display: grid): 1.2rem; else: 1rem);
+@mixin --gradient-text(--from <color>: mediumvioletred, --to <color>: teal) {
+  @result {
+    color: var(--from);
+  }
+}
+
+h1 {
+  @apply --gradient-text(pink, powderblue);
 }
 `;
 
-const result = await postcss([postcssIfFunction()]).process(css, {
+const result = await postcss([postcssMixinMacro()]).process(css, {
 	from: undefined
 });
 
@@ -81,21 +89,8 @@ console.log(result.css);
 **Output:**
 
 ```css
-.example {
-	color: red;
-}
-@media (max-width: 768px) {
-	.example {
-		color: blue;
-	}
-}
-.example {
-	font-size: 1rem;
-}
-@supports (display: grid) {
-	.example {
-		font-size: 1.2rem;
-	}
+h1 {
+	color: pink;
 }
 ```
 
@@ -103,10 +98,8 @@ console.log(result.css);
 
 ```js
 const result = await postcss([
-	postcssIfFunction({
-		logTransformations: true,
-		preserveOriginal: false,
-		skipSelectors: [".no-transform"]
+	postcssMixinMacro({
+		logTransformations: true
 	})
 ]).process(css, { from: undefined });
 ```
@@ -115,11 +108,11 @@ const result = await postcss([
 
 ```js
 // postcss.config.js
-import { postcssIfFunction } from "postcss-transform-mixins";
+import { postcssMixinMacro } from "postcss-transform-mixins";
 
 export default {
 	plugins: [
-		postcssIfFunction({
+		postcssMixinMacro({
 			logTransformations: process.env.NODE_ENV === "development"
 		})
 	]
@@ -133,13 +126,13 @@ export default {
 ```js
 // vite.config.js
 import { defineConfig } from "vite";
-import { postcssIfFunction } from "postcss-transform-mixins";
+import { postcssMixinMacro } from "postcss-transform-mixins";
 
 export default defineConfig({
 	css: {
 		postcss: {
 			plugins: [
-				postcssIfFunction({
+				postcssMixinMacro({
 					logTransformations: process.env.NODE_ENV === "development"
 				})
 			]
@@ -201,108 +194,122 @@ module.exports = {
 
 ## Options
 
-| Option               | Type       | Default | Description                                                                |
-| -------------------- | ---------- | ------- | -------------------------------------------------------------------------- |
-| `preserveOriginal`   | `boolean`  | `false` | Whether to preserve original CSS alongside transformations (for debugging) |
-| `logTransformations` | `boolean`  | `false` | Whether to log transformation statistics to console                        |
-| `skipSelectors`      | `string[]` | `[]`    | Array of selectors to skip transformation for                              |
+| Option               | Type      | Default | Description                                         |
+| -------------------- | --------- | ------- | --------------------------------------------------- |
+| `logTransformations` | `boolean` | `false` | Whether to log transformation statistics to console |
 
 ## Supported Transformations
 
-### Media Queries
+### Macros
 
-<!-- FIXTURE: basic-media -->
+Macros provide simple, literal substitution of a block of styles at each `@apply` site.
+
+<!-- FIXTURE: macro.basic -->
 
 <!-- Note: This content is automatically generated from test fixtures. Do not edit the code blocks directly - they will be overwritten during the build process. To modify test cases, edit the corresponding .input.css and .expected.css files in the test/fixtures/ directory -->
 
 **Input CSS:**
 
 ```css
-.responsive {
-	width: if(media(width <= 768px): 100%; else: 50%);
+@macro --reset-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.nav {
+	@apply --reset-list;
 }
 ```
 
 **Expected Output:**
 
 ```css
-.responsive {
-	width: 50%;
-}
-@media (width <= 768px) {
-	.responsive {
-		width: 100%;
-	}
+.nav {
+	margin: 0;
+	padding: 0;
+	list-style: none;
 }
 ```
 
 <!-- /FIXTURE -->
 
-### Feature Support Queries
+### Mixins
 
-<!-- FIXTURE: basic-supports -->
-
-<!-- Note: This content is automatically generated from test fixtures. Do not edit the code blocks directly - they will be overwritten during the build process. To modify test cases, edit the corresponding .input.css and .expected.css files in the test/fixtures/ directory -->
+Mixins extend macros with support for parameters, default values, local variables, and `@result` blocks.
 
 **Input CSS:**
 
 ```css
-.grid {
-	display: if(supports(display: grid): grid; else: block);
+@mixin --gradient-text(
+	--from <color>: mediumvioletred,
+	--to <color>: teal,
+	--angle: to bottom right
+) {
+	@result {
+		color: var(--from, var(--to));
+
+		@supports (background-clip: text) or (-webkit-background-clip: text) {
+			background: linear-gradient(var(--angle), var(--from), var(--to));
+			color: transparent;
+			-webkit-background-clip: text;
+			background-clip: text;
+		}
+	}
+}
+
+h1 {
+	@apply --gradient-text(pink, powderblue);
 }
 ```
 
 **Expected Output:**
 
 ```css
-.grid {
-	display: block;
-}
-@supports (display: grid) {
-	.grid {
-		display: grid;
+h1 {
+	color: var(--from, var(--to));
+
+	@supports (background-clip: text) or (-webkit-background-clip: text) {
+		background: linear-gradient(var(--angle), var(--from), var(--to));
+		color: transparent;
+		-webkit-background-clip: text;
+		background-clip: text;
 	}
 }
 ```
 
-<!-- /FIXTURE -->
+### Macros with `@contents`
 
-### Multiple Conditions
+Macros (and mixins) can accept a contents block via `@contents`, allowing callers to inject styles into a predefined structure.
 
-<!-- FIXTURE: multiple-concatenated-conditions -->
+<!-- FIXTURE: macro.contents -->
 
 <!-- Note: This content is automatically generated from test fixtures. Do not edit the code blocks directly - they will be overwritten during the build process. To modify test cases, edit the corresponding .input.css and .expected.css files in the test/fixtures/ directory -->
 
 **Input CSS:**
 
 ```css
-.responsive {
-	padding: if(
-		media(width >= 1200px): 40px; media(width >= 768px): 30px;
-			media(width >= 480px): 20px; else: 15px
-	);
+@macro --one-column {
+	@media (width <= 800px) {
+		@contents;
+	}
+}
+
+body {
+	@apply --one-column {
+		display: flex;
+		flex-flow: column;
+	}
 }
 ```
 
 **Expected Output:**
 
 ```css
-.responsive {
-	padding: 15px;
-}
-@media (width >= 480px) {
-	.responsive {
-		padding: 20px;
-	}
-}
-@media (width >= 768px) {
-	.responsive {
-		padding: 30px;
-	}
-}
-@media (width >= 1200px) {
-	.responsive {
-		padding: 40px;
+body {
+	@media (width <= 800px) {
+		display: flex;
+		flex-flow: column;
 	}
 }
 ```
@@ -311,38 +318,26 @@ module.exports = {
 
 ## Limitations
 
-- **Style Functions Not Supported**: This plugin only transforms `media()` and `supports()` functions. For `style()` functions (which depend on runtime DOM state), use the [css-mixin-polyfill](https://github.com/mfranzke/css-mixin-polyfill/tree/main/packages/css-mixin-polyfill/) runtime (browser) library
-- **Static Analysis Only**: The plugin performs static analysis and cannot handle dynamically generated CSS
+- **Static Analysis Only**: The plugin performs static analysis at build time and cannot handle dynamically generated CSS or runtime-dependent values
 - **PostCSS Compatibility**: Requires PostCSS 8.0.0 or higher
 
 ## Integration with Runtime Polyfill
 
-For complete CSS `if()` support including `style()` functions, combine this plugin with the runtime polyfill:
+For complete CSS `@mixin`/`@macro`/`@apply` support — including runtime evaluation, hygienic variable renaming, and dynamic argument resolution — combine this plugin with the runtime polyfill:
 
-1. Use this PostCSS plugin for build-time transformation of `media()` and `supports()`
-2. Use [css-mixin-polyfill](https://github.com/mfranzke/css-mixin-polyfill/tree/main/packages/css-mixin-polyfill/) runtime for `style()` functions
+1. Use this PostCSS plugin for build-time transformation of `@mixin`, `@macro`, and `@apply` rules
+2. Use [css-mixin-polyfill](https://github.com/mfranzke/css-mixin-polyfill/tree/main/packages/css-mixin-polyfill/) runtime for full browser-side support
 
 ```html
-<!-- For style() functions only -->
+<!-- For full runtime mixin/macro support -->
 <script src="https://cdn.jsdelivr.net/npm/css-mixin-polyfill/dist/index.modern.js"></script>
 ```
 
 ## Performance Considerations
 
-This plugin is designed for optimal build-time performance, transforming CSS mixins to native CSS without runtime overhead. However, there are some architectural considerations:
+This plugin is designed for optimal build-time performance, transforming CSS `@mixin` and `@macro` definitions and resolving `@apply` rules into native CSS without runtime overhead.
 
-### Current Implementation
-
-- **Double Parsing**: The plugin currently parses CSS twice - once by PostCSS and once by the transformation engine
-- **String-based Transformation**: The transformation engine outputs CSS strings that are re-parsed into PostCSS AST nodes
-
-### Future Optimization Opportunities
-
-- **Reduced CSS Code**: We'll make use of CSS Nesting capabilities as soon as any of the browsers are EOL ([#35](https://github.com/mfranzke/css-mixin-polyfill/issues/35)).
-- **Direct AST Transformation**: The transformation engine could be modified to output PostCSS AST nodes directly, eliminating the double parsing overhead
-- **Streaming Processing**: For very large CSS files, streaming transformation could reduce memory usage
-
-For most typical usage scenarios, the current performance is excellent and the double parsing overhead is negligible compared to the benefits of build-time transformation.
+For most typical usage scenarios, the performance is excellent and the overhead is negligible compared to the benefits of build-time transformation.
 
 ## Contributing
 
@@ -355,9 +350,9 @@ MIT © [Maximilian Franzke](https://github.com/mfranzke)
 ## Related
 
 - [PostCSS](https://postcss.org/) - Tool for transforming CSS with JavaScript
-- [CSS Conditional Rules](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_conditional_rules) - MDN documentation for @media and @supports
+- [CSS Mixins & Functions](https://drafts.csswg.org/css-mixins/) - CSS specification for `@mixin`, `@macro`, and `@apply`
 
 ## Further solutions
 
 - [css-mixin-polyfill](https://github.com/mfranzke/css-mixin-polyfill/tree/main/packages/css-mixin-polyfill/) - Runtime polyfill for CSS mixins
-- [stylelint-config-mixin](https://github.com/mfranzke/css-mixin-polyfill/tree/main/packages/stylelint-config-mixin) - Stylelint configuration for linting CSS mixinusage
+- [stylelint-config-mixin](https://github.com/mfranzke/css-mixin-polyfill/tree/main/packages/stylelint-config-mixin) - Stylelint configuration for linting CSS mixin usage

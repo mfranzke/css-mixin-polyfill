@@ -2,7 +2,7 @@
 @mixin --m1() {  /* Will be overwritten. */
 	@result {
 		.cls {
-		color: red;
+		color: brown;
 		}
 	}
 }

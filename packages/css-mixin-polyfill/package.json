@@ -2,7 +2,7 @@
   "name": "css-mixin-polyfill",
   "version": "0.1.5",
   "type": "module",
-  "description": "A JavaScript polyfill for CSS mixinality with style(), media(), and supports() functions",
+  "description": "A JavaScript polyfill for CSS @mixin, @macro, and @apply rules",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mfranzke/css-mixin-polyfill.git"
@@ -40,11 +40,11 @@
   "keywords": [
     "css",
     "polyfill",
-    "conditional",
-    "if",
-    "media-query",
-    "supports",
-    "style"
+    "mixin",
+    "macro",
+    "apply",
+    "at-rule",
+    "reusable-styles"
   ],
   "scripts": {
     "build": "microbundle",

@@ -1,22 +1,13 @@
-import { beforeEach, describe, expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import {
 	basicFixtureTests,
 	loadFixture,
 	normalizeCSS
 } from '../../../test/scripts/fixture-utils.js';
-import { buildTimeTransform, init, processCSSText } from '../src/index.js';
+import { buildTimeTransform, processCSSText } from '../src/index.js';
 
-describe('Integrated CSS cssMixinMacroPolyfill', () => {
-	beforeEach(() => {
-		// Initialize with native transformation enabled
-		init({
-			debug: false,
-			autoInit: false,
-			useNativeTransform: true
-		});
-	});
-
-	describe('Build-time transformation', () => {
+describe('Integrated CSS Mixin and Macro Polyfill', () => {
+	describe('Build-time transformation with fixtures', () => {
 		// Generate tests for each fixture
 		for (const { fixture, description } of basicFixtureTests) {
 			test(description, () => {
@@ -29,75 +20,69 @@ describe('Integrated CSS cssMixinMacroPolyfill', () => {
 				expect(result.hasRuntimeRules).toBe(false);
 			});
 		}
+	});
 
-		test('handles mixed media and style conditions', () => {
-			const { input } = loadFixture('mixed-conditions');
-			const result = buildTimeTransform(input);
-
-			// The current buildTimeTransform only handles media() and supports() conditions
-			// and leaves style() conditions for runtime processing
-			expect(result.nativeCSS).toContain('@media (width >= 768px)');
-			expect(result.nativeCSS).toContain('color: #00f');
-			expect(result.nativeCSS).toContain('color: red');
-
-			// Note: Consider if style() conditions should fall back to else clause during build time
-			// The fixture expects: .test{background: white;} but current implementation
-			// might defer style() conditions to runtime processing
-		});
-
-		test('keeps style() conditions for runtime processing', () => {
+	describe('Build-time transformation', () => {
+		test('transforms @macro correctly', () => {
 			const css = `
-				.test {
-					color: if(style(--theme): var(--primary); else: blue);
-				}
-			`;
-
+@macro --reset-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.foo {
+  @apply --reset-list;
+}`;
 			const result = buildTimeTransform(css);
 
-			expect(result.hasRuntimeRules).toBe(true);
-			expect(result.runtimeCSS).toContain('style(--theme)');
+			expect(result.nativeCSS).toContain('margin: 0');
+			expect(result.nativeCSS).toContain('padding: 0');
+			expect(result.nativeCSS).toContain('list-style: none');
+			expect(result.hasRuntimeRules).toBe(false);
 		});
 
-		test('handles mixed conditions', () => {
+		test('transforms @mixin with parameters correctly', () => {
 			const css = `
-				.test {
-					color: if(media(min-width: 768px): blue; else: red);
-					background: if(style(--dark-mode): black; else: white);
-				}
-			`;
-
+@mixin --colored(--color <color>: red) {
+  @result {
+    color: var(--color);
+  }
+}
+.test {
+  @apply --colored(blue);
+}`;
 			const result = buildTimeTransform(css);
 
-			expect(result.nativeCSS).toContain('@media (min-width: 768px)');
-			expect(result.hasRuntimeRules).toBe(true);
-			expect(result.runtimeCSS).toContain('style(--dark-mode)');
+			expect(result.nativeCSS).toContain('color: blue');
+			expect(result.hasRuntimeRules).toBe(false);
 		});
 
 		test('minifies output when requested', () => {
 			const css = `
-				.test {
-					color: if(media(min-width: 768px): blue; else: red);
-				}
-			`;
-
+@macro --spacing {
+  margin: 10px;
+  padding: 20px;
+}
+.test {
+  @apply --spacing;
+}`;
 			const result = buildTimeTransform(css, { minify: true });
 
 			// Minified CSS should have reduced whitespace
 			expect(result.nativeCSS).not.toContain('\n  ');
-			expect(result.nativeCSS.length).toBeLessThan(css.length);
 		});
 
 		test('reports transformation statistics', () => {
 			const css = `
-				.test {
-					color: if(media(min-width: 768px): blue; else: red);
-					font-size: 16px;
-				}
-				.other {
-					background: if(supports(display: grid): transparent; else: white);
-				}
-			`;
-
+@macro --m {
+  color: red;
+}
+.test {
+  @apply --m;
+}
+.other {
+  font-size: 16px;
+}`;
 			const result = buildTimeTransform(css);
 
 			expect(result.stats).toBeDefined();
@@ -107,82 +92,71 @@ describe('Integrated CSS cssMixinMacroPolyfill', () => {
 	});
 
 	describe('Runtime processing integration', () => {
-		test('processes CSS text with native transformation enabled', () => {
+		test('processes CSS text correctly', () => {
 			const css = `
-				.test {
-					color: if(style(--theme): var(--primary); else: blue);
-				}
-			`;
+@macro --highlight {
+  background: yellow;
+}
+.test {
+  @apply --highlight;
+}`;
+			const result = processCSSText(css);
 
-			// This should work with the integrated approach
-			const result = processCSSText(css, { useNativeTransform: true });
-
-			// For style() conditions, should still process with polyfill
 			expect(result).toBeDefined();
 			expect(typeof result).toBe('string');
+			expect(result).toContain('background: yellow');
 		});
 
-		test('falls back to polyfill when native transformation fails', () => {
-			const css = `
-				.test {
-					color: if(invalid-condition: blue; else: red);
-				}
-			`;
+		test('passes through CSS without @mixin/@macro/@apply unchanged', () => {
+			const css = '.test { color: blue; font-size: 14px; }';
+			const result = processCSSText(css);
 
-			// Should handle malformed CSS mixingracefully
-			const result = processCSSText(css, { useNativeTransform: true });
-
-			expect(result).toBeDefined();
-			expect(typeof result).toBe('string');
+			expect(result).toBe(css);
 		});
 	});
 
 	describe('Complex scenarios', () => {
-		test('handles multiple conditions in single mixin', () => {
+		test('handles nested mixin applications', () => {
 			const css = `
-				.test {
-					color: if(media(min-width: 1200px): blue; media(min-width: 768px): green; else: red);
-				}
-			`;
-
+@macro --reset {
+  margin: 0;
+  padding: 0;
+}
+@mixin --card() {
+  @result {
+    @apply --reset;
+    border: 1px solid gray;
+    border-radius: 4px;
+  }
+}
+.card {
+  @apply --card;
+}`;
 			const result = buildTimeTransform(css);
 
-			// Should handle multiple conditions appropriately
-			expect(result.nativeCSS || result.runtimeCSS).toBeDefined();
+			expect(result.nativeCSS).toContain('margin: 0');
+			expect(result.nativeCSS).toContain('border: 1px solid gray');
+			expect(result.nativeCSS).not.toContain('@apply');
 		});
 
-		test('handles multiple CSS mixinin same property', () => {
+		test('preserves non-mixin CSS rules', () => {
 			const css = `
-				.test {
-					margin: if(media(min-width: 768px): 20px; else: 10px) if(supports(margin-inline: 0): 0; else: auto);
-				}
-			`;
-
+@macro --highlight {
+  background: yellow;
+}
+.header {
+  background: blue;
+  font-size: 24px;
+}
+.test {
+  @apply --highlight;
+}
+.footer {
+  padding: 20px;
+}`;
 			const result = buildTimeTransform(css);
 
-			expect(result.nativeCSS).toContain('@media (min-width: 768px)');
-			expect(result.nativeCSS).toContain('@supports (margin-inline: 0)');
-		});
-
-		test('preserves non-CSS mixinCSS rules', () => {
-			const css = `
-				.header {
-					background: blue;
-					font-size: 24px;
-				}
-
-				.test {
-					color: if(media(min-width: 768px): blue; else: red);
-				}
-
-				.footer {
-					padding: 20px;
-				}
-			`;
-
-			const result = buildTimeTransform(css);
-
-			// Should preserve non-CSS mixinrules
+			// Should preserve non-mixin rules
 			expect(result.nativeCSS).toContain('background: blue');
 			expect(result.nativeCSS).toContain('font-size: 24px');
 			expect(result.nativeCSS).toContain('padding: 20px');
@@ -190,30 +164,18 @@ describe('Integrated CSS cssMixinMacroPolyfill', () => {
 	});
 
 	describe('Error handling', () => {
-		test('handles malformed mixins gracefully', () => {
-			const css = `
-				.test {
-					color: if(media(min-width: 768px): blue);
-				}
-			`;
-
-			const result = buildTimeTransform(css);
-
-			// Should not throw, should handle gracefully
+		test('handles empty input', () => {
+			const result = buildTimeTransform('');
 			expect(result).toBeDefined();
+			expect(result.nativeCSS).toBe('');
 		});
 
-		test('handles invalid condition types', () => {
-			const css = `
-				.test {
-					color: if(unknown(test): blue; else: red);
-				}
-			`;
-
+		test('handles CSS with only regular rules (no mixins)', () => {
+			const css = '.test { color: blue; }';
 			const result = buildTimeTransform(css);
 
-			// Should fall back to runtime processing or leave unchanged
 			expect(result).toBeDefined();
+			expect(result.nativeCSS).toContain('color: blue');
 		});
 	});
 });

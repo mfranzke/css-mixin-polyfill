@@ -6,30 +6,22 @@
  *
  * @example
  * // Input CSS:
+ * @macro --reset-list {
+ *   margin: 0;
+ *   padding: 0;
+ *   list-style-type: "";
+ * }
  * .example {
- *   color: if(media(max-width: 768px): blue; else: red);
- *   font-size: if(supports(display: grid): 1.2rem; else: 1rem);
+ *   @apply --reset-list;
+ *   color: blue;
  * }
  *
  * // Output CSS:
  * .example {
- *   color: red;
- * }
- *
- * @media (max-width: 768px) {
- *   .example {
- *     color: blue;
- *   }
- * }
- *
- * @supports (display: grid) {
- *   .example {
- *     font-size: 1.2rem;
- *   }
- * }
- *
- * .example {
- *   font-size: 1rem;
+ *   margin: 0;
+ *   padding: 0;
+ *   list-style-type: "";
+ *   color: blue;
  * }
  */
 
@@ -46,11 +38,11 @@ const PLUGIN_NAME = 'postcss-transform-mixins';
  */
 
 /**
- * Creates the PostCSS CSS mixinplugin
+ * Creates the PostCSS CSS mixin/macro plugin
  * @param {PluginOptions} [options={}] - Plugin configuration options
  * @returns {Object} PostCSS plugin
  */
-function postcssIfFunction(options = {}) {
+function postcssMixinMacro(options = {}) {
 	const {
 		preserveOriginal: _preserveOriginal = false,
 		logTransformations = false,
@@ -63,8 +55,12 @@ function postcssIfFunction(options = {}) {
 			// Collect all CSS text first
 			const cssText = root.toString();
 
-			// Check if there are any mixins to transform
-			if (!cssText.includes('if(')) {
+			// Check if there are any @mixin/@macro/@apply rules to transform
+			if (
+				!cssText.includes('@mixin ') &&
+				!cssText.includes('@macro ') &&
+				!cssText.includes('@apply ')
+			) {
 				return;
 			}
 
@@ -117,7 +113,7 @@ function postcssIfFunction(options = {}) {
 	};
 }
 
-postcssIfFunction.postcss = true;
+postcssMixinMacro.postcss = true;
 
-export { postcssIfFunction };
-export default postcssIfFunction;
+export { postcssMixinMacro };
+export default postcssMixinMacro;

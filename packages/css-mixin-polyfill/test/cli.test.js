@@ -10,12 +10,26 @@ describe('CLI Tool', () => {
 	const testOutputFile = 'test-cli-output.css';
 
 	beforeEach(async () => {
-		// Create test input file
+		// Create test input file with @mixin/@macro/@apply syntax
 		const testCSS = `
-.test {
-  color: if(media(min-width: 768px): blue; else: red);
-  background: if(supports(display: grid): transparent; else: white);
-  font-size: if(style(--large): 24px; else: 16px);
+@macro --reset-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@mixin --colored(--color <color>: red) {
+  @result {
+    color: var(--color);
+  }
+}
+
+.foo {
+  @apply --reset-list;
+}
+
+.bar {
+  @apply --colored(blue);
 }
 `;
 		await writeFile(testInputFile, testCSS);
@@ -42,9 +56,11 @@ describe('CLI Tool', () => {
 
 		// Check output file exists and contains transformed CSS
 		const outputContent = await readFile(testOutputFile, 'utf8');
-		expect(outputContent).toContain('@media (min-width: 768px)');
-		expect(outputContent).toContain('@supports (display: grid)');
-		expect(outputContent).toContain('Runtime-processed rules');
+		expect(outputContent).toContain('margin: 0');
+		expect(outputContent).toContain('color: blue');
+		expect(outputContent).not.toContain('@macro');
+		expect(outputContent).not.toContain('@mixin');
+		expect(outputContent).not.toContain('@apply');
 	});
 
 	test('outputs to stdout when no output file specified', async () => {
@@ -54,13 +70,15 @@ describe('CLI Tool', () => {
 
 		expect(stdout).toContain('Transformation Statistics');
 		expect(stdout).toContain('Transformed CSS:');
-		expect(stdout).toContain('@media (min-width: 768px)');
+		expect(stdout).toContain('margin: 0');
 	});
 
 	test('shows help when no arguments provided', async () => {
 		const { stdout } = await execAsync('node bin/cli.js --help');
 
-		expect(stdout).toContain('CSS mixinBuild-time Transformation CLI');
+		expect(stdout).toContain(
+			'CSS Mixin/Macro Build-time Transformation CLI'
+		);
 		expect(stdout).toContain('Usage:');
 		expect(stdout).toContain('Options:');
 	});

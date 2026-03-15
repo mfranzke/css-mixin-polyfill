@@ -1,38 +1,58 @@
 <!doctype html>
 <html>
 	<head>
-		<title>CSS cssMixinMacroPolyfill Performance Test</title>
+		<title>CSS Mixin and Macro Polyfill Performance Test</title>
 		<style>
-			/* Test styles with various CSS mixinconditions */
+			/* Test styles with CSS @mixin/@macro/@apply rules */
+			@macro --test-reset {
+				margin: 0;
+				padding: 0;
+			}
+
+			@mixin --test-colors(
+				--bg <color>: lightblue,
+				--text <color>: black
+			) {
+				@result {
+					background: var(--bg);
+					color: var(--text);
+				}
+			}
+
+			@macro --test-box {
+				padding: 10px;
+				border: 1px solid #ccc;
+				border-radius: 4px;
+			}
+
 			.test-element-1 {
-				color: if(media(min-width: 768px): blue; else: red);
+				@apply --test-reset;
+				@apply --test-colors(blue, white);
 			}
 
 			.test-element-2 {
-				background: if(supports(display: grid): white; else: gray);
+				@apply --test-box;
+				@apply --test-colors(green, white);
 			}
 
 			.test-element-3 {
-				font-size: if(style(--large): 18px; else: 14px);
+				@apply --test-reset;
+				@apply --test-box;
 			}
 
 			.test-element-4 {
-				padding: if(media(max-width: 480px): 10px; else: 20px);
+				@apply --test-colors(coral, black);
 			}
 
 			.test-element-5 {
-				margin: if(media(min-width: 1024px): 30px; else: 15px);
+				@apply --test-colors;
 			}
 
-			/* Multiple conditions */
+			/* Multiple applies */
 			.test-complex {
-				color: if(
-					media(min-width: 768px): blue; supports(color: red): red;
-						else: black
-				);
-				background: if(
-					media(orientation: landscape): white; else: lightgray
-				);
+				@apply --test-reset;
+				@apply --test-box;
+				@apply --test-colors(tomato, white);
 			}
 		</style>
 	</head>
@@ -72,12 +92,21 @@
 
 				// Test processing time
 				const testCSS = `
-	                      .performance-test {
-	                          color: if(media(min-width: 768px): blue; else: red);
-	                          background: if(supports(display: grid): white; else: gray);
-	                          font-size: if(style(--large): 18px; else: 14px);
-	                      }
-	                  `;
+@macro --perf-reset {
+  margin: 0;
+  padding: 0;
+}
+@mixin --perf-colors(--bg <color>: lightblue) {
+  @result {
+    background: var(--bg);
+    color: white;
+  }
+}
+.performance-test {
+  @apply --perf-reset;
+  @apply --perf-colors(blue);
+}
+			`;
 
 				const processStart = performance.now();
 				for (let i = 0; i < 1000; i++) {

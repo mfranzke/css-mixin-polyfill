@@ -25,9 +25,9 @@
   "keywords": [
     "stylelint",
     "config",
-    "if",
-    "css",
-    "function"
+    "mixin",
+    "macro",
+    "css"
   ],
   "scripts": {
     "build": "microbundle",
