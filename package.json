@@ -35,7 +35,7 @@
     "changeset:version": "changeset version && pnpm install --lockfile-only && prettier '{CHANGELOG.md,packages/*/CHANGELOG.md}' --write",
     "codestyle": "prettier . --write",
     "dev": "pnpm --recursive run dev",
-    "lint": "npm-run-all --parallel lint:*",
+    "lint": "npm-run-all --parallel lint:**",
     "lint:markdownlint": "markdownlint --config .config/.markdown-lint.yml **/*.md",
     "lint:packages": "publint packages/css-mixin-polyfill && publint packages/postcss-transform-mixins && publint packages/stylelint-config-mixin",
     "lint:stylelint": "stylelint test/fixtures/*.input.css --config .config/.stylelintrc.json",
