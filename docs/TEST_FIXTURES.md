@@ -4,7 +4,6 @@ This document describes the centralized test fixture system. Each fixture consis
 
 <!-- Note: This content is automatically generated from test fixtures. Do not edit the code blocks directly - they will be overwritten during the build process. To modify test cases, edit the corresponding .input.css and .expected.css files in the test/fixtures/ directory -->
 
-
 ## Fixture Naming Convention
 
 Fixtures follow the pattern:
@@ -22,7 +21,6 @@ test/fixtures/<category>.<name>.expected.css
 | -------- | ------------------------------------------------------------- |
 | `macro`  | `@macro` definitions and `@apply` substitution                |
 | `mixin`  | `@mixin` definitions with `@result`, parameters, and `@apply` |
-
 
 ## Simple `@macro` and `@apply`
 
@@ -63,7 +61,6 @@ A basic `@macro` defines a reusable block of declarations with no parameters. `@
 - `@macro` definition with a dashed-ident name
 - `@apply` substitution of the macro body into a style rule
 - Removal of the `@macro` definition from the output
-
 
 ## `@mixin` with `@result`, Overwriting, and Validation
 
@@ -152,7 +149,6 @@ div {
 - **Empty definitions:** `--empty1` (empty body) and `--empty2` (empty `@result`) produce no output
 - Only the valid, last-defined `--m1` with a non-empty `@result` generates output
 
-
 ## `@macro` with `@contents` and Fallback
 
 Tests the `@contents` substitution rule inside macros. The caller passes a style block via `@apply … { … }`, and the macro substitutes it at the `@contents` location.
@@ -211,7 +207,6 @@ body {
 - Macro wrapping caller styles inside `@media` conditional rules
 - Removal of `@macro` definitions from the output
 
-
 ## `@mixin` with Declaration-Level Output
 
 Tests a minimal `@mixin` that emits plain declarations via `@result`, verifying that the output merges into the calling rule.
@@ -251,7 +246,6 @@ div {
 - `@mixin` with a `@result` block containing a single declaration
 - `@apply` appends the mixin result after existing declarations in the rule
 - The mixin's `color: green` follows the rule's own `color: red`, so it wins per normal CSS cascade order
-
 
 ## Adding New Fixtures
 

@@ -37,6 +37,7 @@ This plugin is part of the [css-mixin-polyfill](https://github.com/mfranzke/css-
 ```
 
 <!-- /FIXTURE -->
+
 ## Installation
 
 ```bash
@@ -314,6 +315,7 @@ body {
 ```
 
 <!-- /FIXTURE -->
+
 ## Limitations
 
 - **Static Analysis Only**: The plugin performs static analysis at build time and cannot handle dynamically generated CSS or runtime-dependent values

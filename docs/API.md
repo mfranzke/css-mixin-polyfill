@@ -211,7 +211,6 @@ import {
 | `substituteContents(body, contentsBlock)` | Replace `@contents` (or `@contents { fallback }`) with the provided contents block (or the fallback if none given).       |
 | `processApplyInBody(body, definitions)`   | Recursively resolve nested `@apply` rules within a body string using the given mixin/macro definitions.                   |
 
-
 ### PostCSS Plugin (`postcss-transform-mixins`)
 
 PostCSS plugin that transforms `@mixin`/`@macro`/`@apply` rules at build time.
@@ -305,7 +304,6 @@ npx css-mixin-polyfill styles.css dist/styles.css --minify --stats
 # Output to stdout
 npx css-mixin-polyfill styles.css --stats
 ```
-
 
 ## CSS Syntax Reference
 
@@ -451,7 +449,6 @@ div {
 /* div .cls { color: green; } */
 ```
 
-
 ## TypeScript Support
 
 Type definitions are shipped with both packages.
@@ -488,7 +485,6 @@ const options: PluginOptions = {
 postcssMixinMacro(options);
 ```
 
-
 ## Browser Support
 
 - **Modern browsers** — Full functionality via ESM bundle or CDN
@@ -496,7 +492,6 @@ postcssMixinMacro(options);
 - **No JavaScript** — Original CSS is preserved; `@mixin`/`@macro`/`@apply` rules are simply ignored by browsers that don't understand them, so base styles still apply
 
 The polyfill auto-initialises on `DOMContentLoaded`. For server-rendered or build-time workflows, use `buildTimeTransform()` or the PostCSS plugin instead.
-
 
 ## Examples
 
