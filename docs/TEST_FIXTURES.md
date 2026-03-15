@@ -2,9 +2,8 @@
 
 This document describes the centralized test fixture system. Each fixture consists of an `.input.css` / `.expected.css` pair in the `test/fixtures/` directory and serves as the single source of truth for CSS transformation tests across all test suites (polyfill, PostCSS plugin, and any future transform backends).
 
-To modify a test case, edit the corresponding fixture files directly — do not edit the code blocks in this document.
+<!-- Note: This content is automatically generated from test fixtures. Do not edit the code blocks directly - they will be overwritten during the build process. To modify test cases, edit the corresponding .input.css and .expected.css files in the test/fixtures/ directory -->
 
----
 
 ## Fixture Naming Convention
 
@@ -24,13 +23,14 @@ test/fixtures/<category>.<name>.expected.css
 | `macro`  | `@macro` definitions and `@apply` substitution                |
 | `mixin`  | `@mixin` definitions with `@result`, parameters, and `@apply` |
 
----
 
-## macro.simple — Simple `@macro` and `@apply`
+## Simple `@macro` and `@apply`
 
 A basic `@macro` defines a reusable block of declarations with no parameters. `@apply` substitutes the macro body at the call site.
 
-**Source:** [test/fixtures/macro.simple.input.css](../test/fixtures/macro.simple.input.css)
+<!-- FIXTURE: macro.simple -->
+
+<!-- Note: This content is automatically generated from test fixtures. Do not edit the code blocks directly - they will be overwritten during the build process. To modify test cases, edit the corresponding .input.css and .expected.css files in the test/fixtures/ directory -->
 
 **Input CSS:**
 
@@ -56,19 +56,22 @@ A basic `@macro` defines a reusable block of declarations with no parameters. `@
 }
 ```
 
+<!-- /FIXTURE -->
+
 **What this tests:**
 
 - `@macro` definition with a dashed-ident name
 - `@apply` substitution of the macro body into a style rule
 - Removal of the `@macro` definition from the output
 
----
 
-## mixin.basic — `@mixin` with `@result`, Overwriting, and Validation
+## `@mixin` with `@result`, Overwriting, and Validation
 
 Tests core `@mixin` behaviour including the `@result` rule, last-definition-wins semantics, and rejection of invalid definitions.
 
-**Source:** [test/fixtures/mixin.basic.input.css](../test/fixtures/mixin.basic.input.css)
+<!-- FIXTURE: mixin.basic -->
+
+<!-- Note: This content is automatically generated from test fixtures. Do not edit the code blocks directly - they will be overwritten during the build process. To modify test cases, edit the corresponding .input.css and .expected.css files in the test/fixtures/ directory -->
 
 **Input CSS:**
 
@@ -138,6 +141,8 @@ div {
 }
 ```
 
+<!-- /FIXTURE -->
+
 **What this tests:**
 
 - **Last-definition-wins:** Two `@mixin --m1()` definitions — the second replaces the first
@@ -147,13 +152,14 @@ div {
 - **Empty definitions:** `--empty1` (empty body) and `--empty2` (empty `@result`) produce no output
 - Only the valid, last-defined `--m1` with a non-empty `@result` generates output
 
----
 
-## macro.contents — `@macro` with `@contents` and Fallback
+## `@macro` with `@contents` and Fallback
 
 Tests the `@contents` substitution rule inside macros. The caller passes a style block via `@apply … { … }`, and the macro substitutes it at the `@contents` location.
 
-**Source:** [test/fixtures/macro.contents.input.css](../test/fixtures/macro.contents.input.css)
+<!-- FIXTURE: macro.contents -->
+
+<!-- Note: This content is automatically generated from test fixtures. Do not edit the code blocks directly - they will be overwritten during the build process. To modify test cases, edit the corresponding .input.css and .expected.css files in the test/fixtures/ directory -->
 
 **Input CSS:**
 
@@ -196,6 +202,8 @@ body {
 }
 ```
 
+<!-- /FIXTURE -->
+
 **What this tests:**
 
 - `@contents` substitution: the caller's block replaces `@contents;` in the macro body
@@ -203,13 +211,14 @@ body {
 - Macro wrapping caller styles inside `@media` conditional rules
 - Removal of `@macro` definitions from the output
 
----
 
-## mixin.declarations — `@mixin` with Declaration-Level Output
+## `@mixin` with Declaration-Level Output
 
 Tests a minimal `@mixin` that emits plain declarations via `@result`, verifying that the output merges into the calling rule.
 
-**Source:** [test/fixtures/mixin.declarations.input.css](../test/fixtures/mixin.declarations.input.css)
+<!-- FIXTURE: mixin.declarations -->
+
+<!-- Note: This content is automatically generated from test fixtures. Do not edit the code blocks directly - they will be overwritten during the build process. To modify test cases, edit the corresponding .input.css and .expected.css files in the test/fixtures/ directory -->
 
 **Input CSS:**
 
@@ -235,13 +244,14 @@ div {
 }
 ```
 
+<!-- /FIXTURE -->
+
 **What this tests:**
 
 - `@mixin` with a `@result` block containing a single declaration
 - `@apply` appends the mixin result after existing declarations in the rule
 - The mixin's `color: green` follows the rule's own `color: red`, so it wins per normal CSS cascade order
 
----
 
 ## Adding New Fixtures
 
