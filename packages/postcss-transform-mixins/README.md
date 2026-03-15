@@ -69,7 +69,7 @@ import postcssMixinMacro from "postcss-transform-mixins";
 const css = `
 @mixin --gradient-text(--from <color>: mediumvioletred, --to <color>: teal) {
   @result {
-    color: var(--from, var(--to));
+    color: var(--from);
   }
 }
 
@@ -89,7 +89,7 @@ console.log(result.css);
 
 ```css
 h1 {
-	color: var(--from, var(--to));
+	color: pink;
 }
 ```
 
