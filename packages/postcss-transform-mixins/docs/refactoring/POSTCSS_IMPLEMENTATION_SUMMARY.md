@@ -69,7 +69,7 @@ The plugin checks whether the CSS contains any `@mixin`, `@macro`, or `@apply` r
 @macro --reset-list {
 	margin: 0;
 	padding: 0;
-	list-style: none;
+	list-style-type: "";
 }
 
 .nav {
@@ -84,7 +84,7 @@ The plugin checks whether the CSS contains any `@mixin`, `@macro`, or `@apply` r
 .nav {
 	margin: 0;
 	padding: 0;
-	list-style: none;
+	list-style-type: "";
 	display: flex;
 }
 ```
