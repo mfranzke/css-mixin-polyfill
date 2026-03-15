@@ -122,6 +122,8 @@ import { refresh } from "css-mixin-polyfill";
 refresh();
 ```
 
+### Build-time Transformation
+
 #### `buildTimeTransform(cssText, options?)`
 
 Transform CSS at build time. Resolves all `@mixin`, `@macro`, and `@apply` rules into native CSS so no runtime polyfill is needed.
