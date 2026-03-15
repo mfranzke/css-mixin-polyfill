@@ -9,7 +9,7 @@
  * @macro --reset-list {
  *   margin: 0;
  *   padding: 0;
- *   list-style: none;
+ *   list-style-type: "";
  * }
  * .example {
  *   @apply --reset-list;
@@ -20,7 +20,7 @@
  * .example {
  *   margin: 0;
  *   padding: 0;
- *   list-style: none;
+ *   list-style-type: "";
  *   color: blue;
  * }
  */
