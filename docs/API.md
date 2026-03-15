@@ -211,7 +211,6 @@ import {
 | `substituteContents(body, contentsBlock)` | Replace `@contents` (or `@contents { fallback }`) with the provided contents block (or the fallback if none given).       |
 | `processApplyInBody(body, definitions)`   | Recursively resolve nested `@apply` rules within a body string using the given mixin/macro definitions.                   |
 
----
 
 ### PostCSS Plugin (`postcss-transform-mixins`)
 
@@ -307,7 +306,6 @@ npx css-mixin-polyfill styles.css dist/styles.css --minify --stats
 npx css-mixin-polyfill styles.css --stats
 ```
 
----
 
 ## CSS Syntax Reference
 
@@ -373,7 +371,7 @@ h1 {
 	@apply --gradient-text(pink, powderblue);
 }
 
-/* With a contents block */
+/* macro with a contents block */
 body {
 	@apply --one-column {
 		display: flex;
@@ -453,7 +451,6 @@ div {
 /* div .cls { color: green; } */
 ```
 
----
 
 ## TypeScript Support
 
@@ -491,7 +488,6 @@ const options: PluginOptions = {
 postcssMixinMacro(options);
 ```
 
----
 
 ## Browser Support
 
@@ -501,7 +497,6 @@ postcssMixinMacro(options);
 
 The polyfill auto-initialises on `DOMContentLoaded`. For server-rendered or build-time workflows, use `buildTimeTransform()` or the PostCSS plugin instead.
 
----
 
 ## Examples
 
