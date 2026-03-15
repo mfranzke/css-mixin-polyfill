@@ -1,6 +1,6 @@
 {
   "name": "stylelint-config-mixin",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "description": "Shareable stylelint config for CSS mixin support",
   "repository": {

@@ -1,5 +1,14 @@
 # postcss-transform-mixins
 
+## 0.0.1
+
+### Patch Changes
+
+- [`b2cacdd`](https://github.com/mfranzke/css-mixin-polyfill/commit/b2cacdd216b47ae507535399d021d1257ca84652) Thanks [@mfranzke](https://github.com/mfranzke)! - refactor: first stack of files specifically for this functionality
+
+- Updated dependencies [[`b2cacdd`](https://github.com/mfranzke/css-mixin-polyfill/commit/b2cacdd216b47ae507535399d021d1257ca84652)]:
+  - css-mixin-polyfill@0.1.6
+
 ## 0.1.8
 
 ### Patch Changes
@@ -24,7 +33,7 @@
 
 - 9e6949d: chore(docs): README improvements
 - Updated dependencies [9e6949d]
-    - css-mixin-polyfill@0.1.5
+  - css-mixin-polyfill@0.1.5
 
 ## 0.1.4
 
@@ -32,7 +41,7 @@
 
 - 6045317: docs: README improvements
 - Updated dependencies [6045317]
-    - css-mixin-polyfill@0.1.4
+  - css-mixin-polyfill@0.1.4
 
 ## 0.1.3
 
@@ -46,7 +55,7 @@
 
 - b7f8df7: fix: ensure that multiple CSS mixinconditions are handled correctly
 - Updated dependencies [b7f8df7]
-    - css-mixin-polyfill@0.1.3
+  - css-mixin-polyfill@0.1.3
 
 ## 0.1.1
 
@@ -55,7 +64,7 @@
 - 9c6d05a: fix: several package metadata related issues
 - 588be15: docs: corrected the package name
 - Updated dependencies [9c6d05a]
-    - css-mixin-polyfill@0.1.2
+  - css-mixin-polyfill@0.1.2
 
 ## 0.1.0
 
@@ -66,4 +75,4 @@
 ### Patch Changes
 
 - Updated dependencies [a6b019d]
-    - css-mixin-polyfill@0.1.1
+  - css-mixin-polyfill@0.1.1
