@@ -4,4 +4,4 @@
 "stylelint-config-mixin": patch
 ---
 
-refactor: first stack of corrected files
+refactor: first stack of files specifically for this functionality
