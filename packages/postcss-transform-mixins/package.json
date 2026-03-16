@@ -1,6 +1,6 @@
 {
   "name": "postcss-transform-mixins",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "description": "PostCSS plugin for transforming CSS mixins to native CSS",
   "repository": {
