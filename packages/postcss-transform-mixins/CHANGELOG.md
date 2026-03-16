@@ -1,5 +1,11 @@
 # postcss-transform-mixins
 
+## 0.0.2
+
+### Patch Changes
+
+- [`2ccc9a1`](https://github.com/mfranzke/css-mixin-polyfill/commit/2ccc9a169412fe5fe1c108a31a78461e821c3b19) Thanks [@mfranzke](https://github.com/mfranzke)! - fix: support CommonJS require in postcss.config.cjs
+
 ## 0.0.1
 
 ### Patch Changes
