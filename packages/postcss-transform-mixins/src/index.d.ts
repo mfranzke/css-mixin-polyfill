@@ -27,10 +27,10 @@ export type PluginOptions = {
  * @param {PluginOptions} [options={}] - Plugin configuration options
  * @returns {Object} PostCSS plugin
  */
-export function postcssMixinMacro(
+declare function postcssMixinMacro(
 	options?: PluginOptions
 ): Record<string, unknown>;
-export namespace postcssMixinMacro {
+declare namespace postcssMixinMacro {
 	const postcss: boolean;
 }
 

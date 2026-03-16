@@ -59,11 +59,6 @@ npx postcss input.css --output output.css --config postcss.config.js
 ### Basic Programmatic Usage
 
 ```js
-// Named export (recommended)
-import postcss from "postcss";
-import { postcssMixinMacro } from "postcss-transform-mixins";
-
-// Or default export (for compatibility)
 import postcss from "postcss";
 import postcssMixinMacro from "postcss-transform-mixins";
 
@@ -107,8 +102,8 @@ const result = await postcss([
 ### With PostCSS Config File
 
 ```js
-// postcss.config.js
-import { postcssMixinMacro } from "postcss-transform-mixins";
+// postcss.config.js (ESM)
+import postcssMixinMacro from "postcss-transform-mixins";
 
 export default {
 	plugins: [
@@ -119,6 +114,13 @@ export default {
 };
 ```
 
+```js
+// postcss.config.cjs (CommonJS)
+module.exports = {
+	plugins: [require("postcss-transform-mixins")]
+};
+```
+
 ### With Popular PostCSS Tools
 
 #### Vite
@@ -126,7 +128,7 @@ export default {
 ```js
 // vite.config.js
 import { defineConfig } from "vite";
-import { postcssMixinMacro } from "postcss-transform-mixins";
+import postcssMixinMacro from "postcss-transform-mixins";
 
 export default defineConfig({
 	css: {

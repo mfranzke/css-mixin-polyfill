@@ -1,5 +1,5 @@
 import postcss from 'postcss';
-import { postcssMixinMacro } from './src/index.js';
+import postcssMixinMacro from './src/index.js';
 
 const css = `
 @macro --responsive-color {

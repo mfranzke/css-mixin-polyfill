@@ -115,5 +115,4 @@ function postcssMixinMacro(options = {}) {
 
 postcssMixinMacro.postcss = true;
 
-export { postcssMixinMacro };
 export default postcssMixinMacro;
